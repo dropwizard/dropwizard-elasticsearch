@@ -1,7 +1,6 @@
 package com.github.joschi.dropwizard.elasticsearch.health;
 
 import com.yammer.metrics.core.HealthCheck;
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.client.Client;
 
@@ -60,18 +59,12 @@ public class EsClusterHealthCheck extends HealthCheck {
      */
     @Override
     protected Result check() throws Exception {
-        final ClusterHealthResponse healthResponse = client.admin()
-                .cluster()
-                .prepareHealth()
-                .setWaitForYellowStatus()
-                .execute()
-                .actionGet();
-        final ClusterHealthStatus status = healthResponse.getStatus();
+        final ClusterHealthStatus status = client.admin().cluster().prepareHealth().get().getStatus();
 
         if (status == ClusterHealthStatus.RED || (failOnYellow && status == ClusterHealthStatus.YELLOW)) {
-            return Result.unhealthy("Last status: %s", healthResponse.getStatus().name());
+            return Result.unhealthy("Last status: %s", status.name());
         } else {
-            return Result.healthy("Last status: %s", healthResponse.getStatus().name());
+            return Result.healthy("Last status: %s", status.name());
         }
     }
 }
