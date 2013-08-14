@@ -8,30 +8,53 @@ import org.elasticsearch.client.Client;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A {@link HealthCheck} which checks the cluster state of an Elasticsearch cluster.
+ *
+ * @see <a href="http://www.elasticsearch.org/guide/reference/api/admin-cluster-health/">Admin Cluster Health</a>
  */
 public class EsClusterHealthCheck extends HealthCheck {
     private final Client client;
     private final boolean failOnYellow;
 
+    /**
+     * Construct a new Elasticsearch cluster health check.
+     *
+     * @param name         the name of the health check. Useful if multiple clusters should be checked
+     * @param client       an Elasticsearch {@link Client} instance connected to the cluster
+     * @param failOnYellow whether the health check should fail if the cluster health state is yellow
+     */
     public EsClusterHealthCheck(String name, Client client, boolean failOnYellow) {
         super(name);
         this.client = checkNotNull(client);
         this.failOnYellow = failOnYellow;
     }
 
+    /**
+     * Construct a new Elasticsearch cluster health check.
+     *
+     * @param client       an Elasticsearch {@link Client} instance connected to the cluster
+     * @param failOnYellow whether the health check should fail if the cluster health state is yellow
+     */
     public EsClusterHealthCheck(Client client, boolean failOnYellow) {
         this("elasticsearch-cluster", client, failOnYellow);
     }
 
+    /**
+     * Construct a new Elasticsearch cluster health check which will fail if the cluster health state is
+     * {@link ClusterHealthStatus#RED}.
+     *
+     * @param client an Elasticsearch {@link Client} instance connected to the cluster
+     */
     public EsClusterHealthCheck(Client client) {
         this(client, false);
     }
 
     /**
-     * Perform a check of the application component.
+     * Perform a check of the Elasticsearch cluster health.
      *
-     * @return if the component is healthy, a healthy {@link com.yammer.metrics.core.HealthCheck.Result}; otherwise, an unhealthy
-     *         {@link com.yammer.metrics.core.HealthCheck.Result} with a descriptive error message or exception
+     * @return if the Elasticsearch cluster is healthy, a healthy {@link com.yammer.metrics.core.HealthCheck.Result};
+     *         otherwise, an unhealthy {@link com.yammer.metrics.core.HealthCheck.Result} with a descriptive error
+     *         message or exception
      * @throws Exception if there is an unhandled error during the health check; this will result in
      *                   a failed health check
      */

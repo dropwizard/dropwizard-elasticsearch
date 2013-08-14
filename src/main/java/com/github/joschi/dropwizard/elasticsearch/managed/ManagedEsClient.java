@@ -13,11 +13,23 @@ import org.elasticsearch.node.Node;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 /**
+ * A Dropwizard managed Elasticsearch {@link Client}. Depending on the {@link EsConfiguration} a Node Client or
+ * a {@link TransportClient} a is being created and its lifecycle is managed by Dropwizard.
+ *
+ * @see <a href="http://www.elasticsearch.org/guide/reference/java-api/client/#nodeclient">Node Client</a>
+ * @see <a href="http://www.elasticsearch.org/guide/reference/java-api/client/#transportclient">Transport Client</a>
  */
 public class ManagedEsClient implements Managed {
     private Node node = null;
     private Client client = null;
 
+    /**
+     * Create a new managed Elasticsearch {@link Client}. If {@link EsConfiguration#nodeClient} is {@literal true}, a
+     * Node Client is being created, otherwise a {@link TransportClient} is being created with {@link EsConfiguration#servers}
+     * as transport addresses.
+     *
+     * @param config a valid {@link EsConfiguration} instance
+     */
     public ManagedEsClient(final EsConfiguration config) {
         final Settings settings = ImmutableSettings.settingsBuilder()
                 .put(config.getSettings())
@@ -36,27 +48,53 @@ public class ManagedEsClient implements Managed {
         }
     }
 
+    /**
+     * Create a new managed Elasticsearch {@link Client} from the provided {@link Node}.
+     *
+     * @param node a valid {@link Node} instance
+     */
     public ManagedEsClient(final Node node) {
         this.node = node;
         this.client = node.client();
     }
 
 
+    /**
+     * Create a new managed Elasticsearch {@link Client} from the provided {@link Client}.
+     *
+     * @param client an initialized {@link Client} instance
+     */
     public ManagedEsClient(Client client) {
         this.client = client;
     }
 
+    /**
+     * Starts the Elasticsearch {@link Node} (if appropriate). Called <i>before</i> the service becomes available.
+     *
+     * @throws Exception if something goes wrong; this will halt the service startup.
+     */
     @Override
     public void start() throws Exception {
         startNode();
     }
 
+    /**
+     * Stops the Elasticsearch {@link Client} and (if appropriate) {@link Node} objects. Called <i>after</i> the service
+     * is no longer accepting requests.
+     *
+     * @throws Exception if something goes wrong.
+     */
     @Override
     public void stop() throws Exception {
         closeClient();
         closeNode();
     }
 
+    /**
+     * Get the managed Elasticsearch {@link Client} instance.
+     *
+     * @return a valid Elasticsearch {@link Client} instance
+     */
     public Client getClient() {
         return client;
     }

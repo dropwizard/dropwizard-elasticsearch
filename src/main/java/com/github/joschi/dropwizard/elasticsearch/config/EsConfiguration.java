@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Configuration class for Elasticsearch related settings.
  */
 public class EsConfiguration {
     @JsonProperty
