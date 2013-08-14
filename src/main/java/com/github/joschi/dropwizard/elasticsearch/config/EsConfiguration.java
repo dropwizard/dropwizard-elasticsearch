@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  */
-public class ElasticsearchConfiguration {
+public class EsConfiguration {
     @JsonProperty
     @NotNull
     private List<HostAndPort> servers = Collections.emptyList();

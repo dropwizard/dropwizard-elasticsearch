@@ -9,21 +9,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  */
-public class ElasticsearchClusterHealthCheck extends HealthCheck {
+public class EsClusterHealthCheck extends HealthCheck {
     private final Client client;
     private final boolean failOnYellow;
 
-    public ElasticsearchClusterHealthCheck(String name, Client client, boolean failOnYellow) {
+    public EsClusterHealthCheck(String name, Client client, boolean failOnYellow) {
         super(name);
         this.client = checkNotNull(client);
         this.failOnYellow = failOnYellow;
     }
 
-    public ElasticsearchClusterHealthCheck(Client client, boolean failOnYellow) {
+    public EsClusterHealthCheck(Client client, boolean failOnYellow) {
         this("elasticsearch-cluster", client, failOnYellow);
     }
 
-    public ElasticsearchClusterHealthCheck(Client client) {
+    public EsClusterHealthCheck(Client client) {
         this(client, false);
     }
 

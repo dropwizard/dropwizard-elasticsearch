@@ -1,6 +1,6 @@
 package com.github.joschi.dropwizard.elasticsearch.managed;
 
-import com.github.joschi.dropwizard.elasticsearch.config.ElasticsearchConfiguration;
+import com.github.joschi.dropwizard.elasticsearch.config.EsConfiguration;
 import com.github.joschi.dropwizard.elasticsearch.util.TransportAddressHelper;
 import com.yammer.dropwizard.lifecycle.Managed;
 import org.elasticsearch.client.Client;
@@ -14,11 +14,11 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 /**
  */
-public class ManagedElasticsearchClient implements Managed {
+public class ManagedEsClient implements Managed {
     private Node node = null;
     private Client client = null;
 
-    public ManagedElasticsearchClient(final ElasticsearchConfiguration config) {
+    public ManagedEsClient(final EsConfiguration config) {
         final Settings settings = ImmutableSettings.settingsBuilder()
                 .put(config.getSettings())
                 .put("cluster.name", config.getClusterName())
@@ -36,13 +36,13 @@ public class ManagedElasticsearchClient implements Managed {
         }
     }
 
-    public ManagedElasticsearchClient(final Node node) {
+    public ManagedEsClient(final Node node) {
         this.node = node;
         this.client = node.client();
     }
 
 
-    public ManagedElasticsearchClient(Client client) {
+    public ManagedEsClient(Client client) {
         this.client = client;
     }
 
