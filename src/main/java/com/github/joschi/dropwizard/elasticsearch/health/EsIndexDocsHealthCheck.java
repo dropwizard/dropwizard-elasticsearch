@@ -38,7 +38,7 @@ public class EsIndexDocsHealthCheck extends HealthCheck {
     public EsIndexDocsHealthCheck(String name, Client client, List<String> indices, long documentThreshold) {
         super(name);
 
-        checkArgument(indices.isEmpty(), "At least one index must be given");
+        checkArgument(!indices.isEmpty(), "At least one index must be given");
         checkArgument(documentThreshold > 0L, "The document threshold must at least be 1");
 
         this.client = checkNotNull(client);

@@ -31,7 +31,7 @@ public class EsIndexExistsHealthCheck extends HealthCheck {
     public EsIndexExistsHealthCheck(String name, Client client, List<String> indices) {
         super(name);
 
-        checkArgument(indices.isEmpty(), "At least one index must be given");
+        checkArgument(!indices.isEmpty(), "At least one index must be given");
 
         this.client = checkNotNull(client);
         this.indices = checkNotNull(indices.toArray(new String[indices.size()]));
