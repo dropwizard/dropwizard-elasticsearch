@@ -2,6 +2,7 @@ package com.github.joschi.dropwizard.elasticsearch.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.net.HostAndPort;
+import com.yammer.dropwizard.validation.ValidationMethod;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -42,5 +43,10 @@ public class EsConfiguration {
 
     public Map<String, String> getSettings() {
         return settings;
+    }
+
+    @ValidationMethod
+    public boolean isValidConfig() {
+        return nodeClient || !servers.isEmpty();
     }
 }
