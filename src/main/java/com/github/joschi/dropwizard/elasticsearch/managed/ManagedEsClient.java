@@ -10,6 +10,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.node.Node;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 /**
@@ -31,6 +32,8 @@ public class ManagedEsClient implements Managed {
      * @param config a valid {@link EsConfiguration} instance
      */
     public ManagedEsClient(final EsConfiguration config) {
+        checkNotNull(config, "EsConfiguration must not be null");
+
         final Settings settings = ImmutableSettings.settingsBuilder()
                 .put(config.getSettings())
                 .put("cluster.name", config.getClusterName())
@@ -54,7 +57,7 @@ public class ManagedEsClient implements Managed {
      * @param node a valid {@link Node} instance
      */
     public ManagedEsClient(final Node node) {
-        this.node = node;
+        this.node = checkNotNull(node, "Elasticsearch node must not be null");
         this.client = node.client();
     }
 
@@ -65,7 +68,7 @@ public class ManagedEsClient implements Managed {
      * @param client an initialized {@link Client} instance
      */
     public ManagedEsClient(Client client) {
-        this.client = client;
+        this.client = checkNotNull(client, "Elasticsearch client must not be null");
     }
 
     /**
