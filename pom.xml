@@ -32,7 +32,7 @@
 
     <scm>
         <developerConnection>scm:git:git@github.com:joschi/dropwizard-elasticsearch.git</developerConnection>
-        <connection>scm:git:github.com/joschi/dropwizard-elasticsearch.git</connection>
+        <connection>scm:git:https://github.com/joschi/dropwizard-elasticsearch.git</connection>
         <url>https://github.com/joschi/dropwizard-elasticsearch</url>
         <tag>HEAD</tag>
     </scm>
