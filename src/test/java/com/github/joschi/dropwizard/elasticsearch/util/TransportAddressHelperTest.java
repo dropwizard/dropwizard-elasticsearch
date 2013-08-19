@@ -56,7 +56,7 @@ public class TransportAddressHelperTest {
     }
 
     @Test
-    public void fromHostAndPorstWithCorrectDataShouldSucceed() {
+    public void fromHostAndPostWithCorrectDataShouldSucceed() {
         final List<HostAndPort> hostAndPorts = ImmutableList.of(
                 HostAndPort.fromParts("example.net", 1234),
                 HostAndPort.fromParts("example.com", 5678),
