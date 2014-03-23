@@ -1,0 +1,4 @@
+com.github.joschi.dropwizard.elasticsearch.config
+com.github.joschi.dropwizard.elasticsearch.health
+com.github.joschi.dropwizard.elasticsearch.managed
+com.github.joschi.dropwizard.elasticsearch.util
