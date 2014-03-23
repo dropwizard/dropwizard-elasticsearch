@@ -31,9 +31,8 @@
 
     <scm>
         <developerConnection>scm:git:git@github.com:joschi/dropwizard-elasticsearch.git</developerConnection>
-        <connection>scm:git:https://github.com/joschi/dropwizard-elasticsearch.git</connection>
+        <connection>scm:git:github.com/joschi/dropwizard-elasticsearch.git</connection>
         <url>https://github.com/joschi/dropwizard-elasticsearch</url>
-        <tag>HEAD</tag>
     </scm>
 
     <ciManagement>
@@ -42,8 +41,8 @@
     </ciManagement>
 
     <issueManagement>
-        <url>https://github.com/joschi/dropwizard-elasticsearch/issues</url>
         <system>GitHub Issues</system>
+        <url>https://github.com/joschi/dropwizard-elasticsearch/issues</url>
     </issueManagement>
 
     <developers>
