@@ -56,7 +56,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dropwizard.version>0.6.2</dropwizard.version>
-        <elasticsearch.version>0.90.12</elasticsearch.version>
+        <elasticsearch.version>1.0.1</elasticsearch.version>
     </properties>
 
     <dependencies>
