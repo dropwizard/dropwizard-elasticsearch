@@ -45,6 +45,13 @@
         <url>https://github.com/joschi/dropwizard-elasticsearch/issues</url>
     </issueManagement>
 
+    <distributionManagement>
+        <site>
+            <id>dropwizard-elasticsearch-site</id>
+            <url>http://joschi.github.io/dropwizard-elasticsearch/${project.version}</url>
+        </site>
+    </distributionManagement>
+
     <developers>
         <developer>
             <id>j.schalanda</id>
