@@ -147,6 +147,25 @@
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.3</version>
             </plugin>
+            <plugin>
+                <groupId>com.github.github</groupId>
+                <artifactId>site-maven-plugin</artifactId>
+                <version>0.9</version>
+                <configuration>
+                    <path>${project.version}</path>
+                    <message>Creating site for ${project.name} ${project.version}</message>
+                    <merge>true</merge>
+                    <noJekyll>true</noJekyll>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <phase>site-deploy</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <reporting>
