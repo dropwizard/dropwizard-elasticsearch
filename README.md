@@ -67,7 +67,7 @@ This project is available on Maven Central. To add it to your project simply add
     <dependency>
       <groupId>com.github.joschi</groupId>
       <artifactId>dropwizard-elasticsearch</artifactId>
-      <version>0.1.0</version>
+      <version>0.2.0</version>
     </dependency>
 
 
@@ -87,7 +87,7 @@ which sparked the idea for this project.
 License
 -------
 
-Copyright (c) 2013 Jochen Schalanda
+Copyright (c) 2013-2014 Jochen Schalanda
 
 This library is licensed under the Apache License, Version 2.0.
 
