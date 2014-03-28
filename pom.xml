@@ -14,7 +14,7 @@
 
     <groupId>com.github.joschi</groupId>
     <artifactId>dropwizard-elasticsearch</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Dropwizard Elasticsearch Bundle</name>
@@ -63,7 +63,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dropwizard.version>0.6.2</dropwizard.version>
-        <elasticsearch.version>0.90.12</elasticsearch.version>
+        <elasticsearch.version>0.90.13</elasticsearch.version>
     </properties>
 
     <dependencies>
