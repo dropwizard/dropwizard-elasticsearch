@@ -1,10 +1,12 @@
 package com.github.joschi.dropwizard.elasticsearch.config;
 
-import com.yammer.dropwizard.config.ConfigurationException;
-import com.yammer.dropwizard.config.ConfigurationFactory;
-import com.yammer.dropwizard.validation.Validator;
+import io.dropwizard.configuration.ConfigurationException;
+import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.jackson.Jackson;
 import org.junit.Test;
 
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -14,17 +16,19 @@ import java.net.URL;
  * Unit tests for {@link EsConfiguration}.
  */
 public class EsConfigurationTest {
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final ConfigurationFactory<EsConfiguration> configFactory =
+            new ConfigurationFactory<>(EsConfiguration.class, validator, Jackson.newObjectMapper(), "dw");
+
     @Test
     public void defaultConfigShouldBeValid() throws IOException, ConfigurationException {
-        ConfigurationFactory<EsConfiguration> factory = ConfigurationFactory.forClass(EsConfiguration.class, new Validator());
-        factory.build();
+        configFactory.build();
     }
 
     @Test(expected = ConfigurationException.class)
     public void eitherNodeClientOrServerListMustBeSet() throws IOException, ConfigurationException, URISyntaxException {
         URL configFileUrl = this.getClass().getResource("/invalid.yml");
         File configFile = new File(configFileUrl.toURI());
-        ConfigurationFactory<EsConfiguration> factory = ConfigurationFactory.forClass(EsConfiguration.class, new Validator());
-        factory.build(configFile);
+        configFactory.build(configFile);
     }
 }

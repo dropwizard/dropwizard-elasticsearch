@@ -1,16 +1,16 @@
 Dropwizard Elasticsearch
 ========================
-[![Build Status](https://secure.travis-ci.org/joschi/dropwizard-elasticsearch.png?branch=master)](https://travis-ci.org/joschi/dropwizard-elasticsearch)
+[![Build Status](https://travis-ci.org/joschi/dropwizard-elasticsearch.svg?branch=master)](https://travis-ci.org/joschi/dropwizard-elasticsearch)
 
-A set of classes for using [Elasticsearch] [1] in a [Dropwizard] [2] service.
+A set of classes for using [Elasticsearch] [1] in a [Dropwizard] [2] application.
 
 The package provides a [lifecycle-managed] [3] client class (`ManagedEsClient`), a configuration class with the most
-common options (`EsConfiguration`), and some [health checks] [4] which can instantly be used in any Dropwizard service.
+common options (`EsConfiguration`), and some [health checks] [4] which can instantly be used in any Dropwizard application.
 
 [1]: http://www.elasticsearch.org/
-[2]: http://dropwizard.codahale.com/
-[3]: http://dropwizard.codahale.com/manual/core/#managed-objects
-[4]: http://dropwizard.codahale.com/manual/core/#health-checks
+[2]: http://www.dropwizard.io/
+[3]: http://www.dropwizard.io/manual/core.html#managed-objects
+[4]: http://www.dropwizard.io/manual/core.html#health-checks
 
 
 Usage
@@ -67,7 +67,7 @@ This project is available on Maven Central. To add it to your project simply add
     <dependency>
       <groupId>com.github.joschi</groupId>
       <artifactId>dropwizard-elasticsearch</artifactId>
-      <version>0.2.0</version>
+      <version>0.4.0</version>
     </dependency>
 
 

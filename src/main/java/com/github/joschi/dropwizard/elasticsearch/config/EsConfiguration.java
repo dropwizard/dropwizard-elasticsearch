@@ -2,7 +2,7 @@ package com.github.joschi.dropwizard.elasticsearch.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.net.HostAndPort;
-import com.yammer.dropwizard.validation.ValidationMethod;
+import io.dropwizard.validation.ValidationMethod;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;

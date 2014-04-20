@@ -2,7 +2,7 @@ package com.github.joschi.dropwizard.elasticsearch.managed;
 
 import com.github.joschi.dropwizard.elasticsearch.config.EsConfiguration;
 import com.github.joschi.dropwizard.elasticsearch.util.TransportAddressHelper;
-import com.yammer.dropwizard.lifecycle.Managed;
+import io.dropwizard.lifecycle.Managed;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;

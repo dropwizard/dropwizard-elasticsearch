@@ -1,7 +1,7 @@
 package com.github.joschi.dropwizard.elasticsearch.health;
 
+import com.codahale.metrics.health.HealthCheck;
 import com.google.common.collect.ImmutableList;
-import com.yammer.metrics.core.HealthCheck;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.client.Client;
 
@@ -16,26 +16,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see <a href="http://www.elasticsearch.org/guide/reference/api/admin-indices-indices-exists/">Admin Indices Indices Exists</a>
  */
 public class EsIndexExistsHealthCheck extends HealthCheck {
-    private static final String HEALTH_CHECK_NAME = "elasticsearch-index-exists";
     private final Client client;
     private final String[] indices;
-
-    /**
-     * Construct a new Elasticsearch index exists health check.
-     *
-     * @param name    the name of the health check. Useful if multiple instances of the health check should run
-     * @param client  an Elasticsearch {@link Client} instance connected to the cluster
-     * @param indices a {@link List} of indices in Elasticsearch which should be checked
-     * @throws IllegalArgumentException if {@code indices} was {@literal null} or empty
-     */
-    public EsIndexExistsHealthCheck(String name, Client client, List<String> indices) {
-        super(name);
-
-        checkArgument(!indices.isEmpty(), "At least one index must be given");
-
-        this.client = checkNotNull(client);
-        this.indices = checkNotNull(indices.toArray(new String[indices.size()]));
-    }
 
     /**
      * Construct a new Elasticsearch index exists health check.
@@ -45,18 +27,10 @@ public class EsIndexExistsHealthCheck extends HealthCheck {
      * @throws IllegalArgumentException if {@code indices} was {@literal null} or empty
      */
     public EsIndexExistsHealthCheck(Client client, List<String> indices) {
-        this(HEALTH_CHECK_NAME, client, indices);
-    }
+        checkArgument(!indices.isEmpty(), "At least one index must be given");
 
-    /**
-     * Construct a new Elasticsearch index exists health check.
-     *
-     * @param name      the name of the health check. Useful if multiple instances of the health check should run
-     * @param client    an Elasticsearch {@link org.elasticsearch.client.Client} instance connected to the cluster
-     * @param indexName the index in Elasticsearch which should be checked
-     */
-    public EsIndexExistsHealthCheck(String name, Client client, String indexName) {
-        this(name, client, ImmutableList.of(indexName));
+        this.client = checkNotNull(client);
+        this.indices = checkNotNull(indices.toArray(new String[indices.size()]));
     }
 
     /**
@@ -72,8 +46,8 @@ public class EsIndexExistsHealthCheck extends HealthCheck {
     /**
      * Perform a check of the number of documents in the Elasticsearch indices.
      *
-     * @return if the Elasticsearch indices exist, a healthy {@link com.yammer.metrics.core.HealthCheck.Result};
-     *         otherwise, an unhealthy {@link com.yammer.metrics.core.HealthCheck.Result} with a descriptive error
+     * @return if the Elasticsearch indices exist, a healthy {@link com.codahale.metrics.health.HealthCheck.Result};
+     *         otherwise, an unhealthy {@link com.codahale.metrics.health.HealthCheck.Result} with a descriptive error
      *         message or exception
      * @throws Exception if there is an unhandled error during the health check; this will result in
      *                   a failed health check

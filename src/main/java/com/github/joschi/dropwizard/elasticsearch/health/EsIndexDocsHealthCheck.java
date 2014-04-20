@@ -1,7 +1,7 @@
 package com.github.joschi.dropwizard.elasticsearch.health;
 
+import com.codahale.metrics.health.HealthCheck;
 import com.google.common.collect.ImmutableList;
-import com.yammer.metrics.core.HealthCheck;
 import org.elasticsearch.action.admin.indices.stats.IndexStats;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.client.Client;
@@ -28,16 +28,13 @@ public class EsIndexDocsHealthCheck extends HealthCheck {
     /**
      * Construct a new Elasticsearch index document count health check.
      *
-     * @param name              the name of the health check. Useful if multiple instances of the health check should run
      * @param client            an Elasticsearch {@link Client} instance connected to the cluster
      * @param indices           a {@link List} of indices in Elasticsearch which should be checked
      * @param documentThreshold the minimal number of documents in an index
      * @throws IllegalArgumentException if {@code indices} was {@literal null} or empty,
      *                                  or {@code documentThreshold} was less than 1
      */
-    public EsIndexDocsHealthCheck(String name, Client client, List<String> indices, long documentThreshold) {
-        super(name);
-
+    public EsIndexDocsHealthCheck(Client client, List<String> indices, long documentThreshold) {
         checkArgument(!indices.isEmpty(), "At least one index must be given");
         checkArgument(documentThreshold > 0L, "The document threshold must at least be 1");
 
@@ -46,16 +43,6 @@ public class EsIndexDocsHealthCheck extends HealthCheck {
         this.documentThreshold = documentThreshold;
     }
 
-    /**
-     * Construct a new Elasticsearch index document count health check.
-     *
-     * @param client            an Elasticsearch {@link Client} instance connected to the cluster
-     * @param indices           a {@link List} of indices in Elasticsearch which should be checked
-     * @param documentThreshold the minimal number of documents in an index
-     */
-    public EsIndexDocsHealthCheck(Client client, List<String> indices, long documentThreshold) {
-        this(HEALTH_CHECK_NAME, client, indices, documentThreshold);
-    }
 
     /**
      * Construct a new Elasticsearch index document count health check.
@@ -92,8 +79,8 @@ public class EsIndexDocsHealthCheck extends HealthCheck {
      * Perform a check of the number of documents in the Elasticsearch indices.
      *
      * @return if the Elasticsearch indices contain the minimal number of documents, a healthy
-     *         {@link com.yammer.metrics.core.HealthCheck.Result}; otherwise, an unhealthy
-     *         {@link com.yammer.metrics.core.HealthCheck.Result} with a descriptive error message or exception
+     *         {@link com.codahale.metrics.health.HealthCheck.Result}; otherwise, an unhealthy
+     *         {@link com.codahale.metrics.health.HealthCheck.Result} with a descriptive error message or exception
      * @throws Exception if there is an unhandled error during the health check; this will result in
      *                   a failed health check
      */

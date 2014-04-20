@@ -1,16 +1,18 @@
 package com.github.joschi.dropwizard.elasticsearch.managed;
 
 import com.github.joschi.dropwizard.elasticsearch.config.EsConfiguration;
-import com.yammer.dropwizard.config.ConfigurationException;
-import com.yammer.dropwizard.config.ConfigurationFactory;
-import com.yammer.dropwizard.lifecycle.Managed;
-import com.yammer.dropwizard.validation.Validator;
+import io.dropwizard.configuration.ConfigurationException;
+import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.jackson.Jackson;
+import io.dropwizard.lifecycle.Managed;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.node.Node;
 import org.junit.Test;
 
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -28,6 +30,9 @@ import static org.mockito.Mockito.when;
  * Unit tests for {@link ManagedEsClient}.
  */
 public class ManagedEsClientTest {
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final ConfigurationFactory<EsConfiguration> configFactory =
+            new ConfigurationFactory<>(EsConfiguration.class, validator, Jackson.newObjectMapper(), "dw");
 
     @Test(expected = NullPointerException.class)
     public void ensureEsConfigurationIsNotNull() {
@@ -83,8 +88,7 @@ public class ManagedEsClientTest {
     public void nodeClientShouldBeCreatedFromConfig() throws URISyntaxException, IOException, ConfigurationException {
         URL configFileUrl = this.getClass().getResource("/node_client.yml");
         File configFile = new File(configFileUrl.toURI());
-        ConfigurationFactory<EsConfiguration> factory = ConfigurationFactory.forClass(EsConfiguration.class, new Validator());
-        EsConfiguration config = factory.build(configFile);
+        EsConfiguration config = configFactory.build(configFile);
 
         ManagedEsClient managedEsClient = new ManagedEsClient(config);
         Client client = managedEsClient.getClient();
@@ -97,8 +101,7 @@ public class ManagedEsClientTest {
     public void transportClientShouldBeCreatedFromConfig() throws URISyntaxException, IOException, ConfigurationException {
         URL configFileUrl = this.getClass().getResource("/transport_client.yml");
         File configFile = new File(configFileUrl.toURI());
-        ConfigurationFactory<EsConfiguration> factory = ConfigurationFactory.forClass(EsConfiguration.class, new Validator());
-        EsConfiguration config = factory.build(configFile);
+        EsConfiguration config = configFactory.build(configFile);
 
         ManagedEsClient managedEsClient = new ManagedEsClient(config);
         Client client = managedEsClient.getClient();

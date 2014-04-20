@@ -1,6 +1,6 @@
 package com.github.joschi.dropwizard.elasticsearch.health;
 
-import com.yammer.metrics.core.HealthCheck;
+import com.codahale.metrics.health.HealthCheck;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.client.Client;
 
@@ -18,24 +18,12 @@ public class EsClusterHealthCheck extends HealthCheck {
     /**
      * Construct a new Elasticsearch cluster health check.
      *
-     * @param name         the name of the health check. Useful if multiple clusters should be checked
-     * @param client       an Elasticsearch {@link Client} instance connected to the cluster
-     * @param failOnYellow whether the health check should fail if the cluster health state is yellow
-     */
-    public EsClusterHealthCheck(String name, Client client, boolean failOnYellow) {
-        super(name);
-        this.client = checkNotNull(client);
-        this.failOnYellow = failOnYellow;
-    }
-
-    /**
-     * Construct a new Elasticsearch cluster health check.
-     *
      * @param client       an Elasticsearch {@link Client} instance connected to the cluster
      * @param failOnYellow whether the health check should fail if the cluster health state is yellow
      */
     public EsClusterHealthCheck(Client client, boolean failOnYellow) {
-        this("elasticsearch-cluster", client, failOnYellow);
+        this.client = checkNotNull(client);
+        this.failOnYellow = failOnYellow;
     }
 
     /**
@@ -51,8 +39,8 @@ public class EsClusterHealthCheck extends HealthCheck {
     /**
      * Perform a check of the Elasticsearch cluster health.
      *
-     * @return if the Elasticsearch cluster is healthy, a healthy {@link com.yammer.metrics.core.HealthCheck.Result};
-     *         otherwise, an unhealthy {@link com.yammer.metrics.core.HealthCheck.Result} with a descriptive error
+     * @return if the Elasticsearch cluster is healthy, a healthy {@link com.codahale.metrics.health.HealthCheck.Result};
+     *         otherwise, an unhealthy {@link com.codahale.metrics.health.HealthCheck.Result} with a descriptive error
      *         message or exception
      * @throws Exception if there is an unhandled error during the health check; this will result in
      *                   a failed health check
