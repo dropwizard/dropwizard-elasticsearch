@@ -27,9 +27,9 @@ in the same method. At least the usage of `EsClusterHealthCheck` is strongly adv
         // [...]
         @Override
         public void run(DemoConfiguration config, Environment environment) {
-            ManagedEsClient managedClient = new ManagedEsClient(config.getEsConfiguration());
-            environment.manage(managedClient);
-            environment.addHealthCheck(new EsClusterHealthCheck(managedClient.getClient()));
+            final ManagedEsClient managedClient = new ManagedEsClient(configuration.getEsConfiguration());
+            environment.lifecycle().manage(managedClient);
+            environment.healthChecks().register("Cluster health", new EsClusterHealthCheck(managedClient.getClient()));
             // [...]
         }
     }
