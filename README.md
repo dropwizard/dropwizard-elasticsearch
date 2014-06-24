@@ -1,6 +1,8 @@
 Dropwizard Elasticsearch
 ========================
+
 [![Build Status](https://travis-ci.org/joschi/dropwizard-elasticsearch.svg?branch=master)](https://travis-ci.org/joschi/dropwizard-elasticsearch)
+[![Coverage Status](https://img.shields.io/coveralls/joschi/dropwizard-elasticsearch.svg)](https://coveralls.io/r/joschi/dropwizard-elasticsearch)
 
 A set of classes for using [Elasticsearch] [1] in a [Dropwizard] [2] application.
 
