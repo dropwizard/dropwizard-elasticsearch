@@ -12,14 +12,14 @@
         <version>7</version>
     </parent>
 
-    <groupId>com.github.joschi</groupId>
+    <groupId>io.dropwizard.modules</groupId>
     <artifactId>dropwizard-elasticsearch</artifactId>
     <version>0.4.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Dropwizard Elasticsearch Bundle</name>
     <description>Addon bundle for Dropwizard to support Elasticsearch</description>
-    <url>https://github.com/joschi/dropwizard-elasticsearch</url>
+    <url>https://github.com/dropwizard/dropwizard-elasticsearch</url>
 
     <licenses>
         <license>
@@ -30,25 +30,25 @@
     </licenses>
 
     <scm>
-        <developerConnection>scm:git:git@github.com:joschi/dropwizard-elasticsearch.git</developerConnection>
-        <connection>scm:git:github.com/joschi/dropwizard-elasticsearch.git</connection>
-        <url>https://github.com/joschi/dropwizard-elasticsearch</url>
+        <developerConnection>scm:git:git@github.com:dropwizard/dropwizard-elasticsearch.git</developerConnection>
+        <connection>scm:git:https://github.com/dropwizard/dropwizard-elasticsearch.git</connection>
+        <url>https://github.com/dropwizard/dropwizard-elasticsearch</url>
     </scm>
 
     <ciManagement>
         <system>Travis CI</system>
-        <url>https://travis-ci.org/joschi/dropwizard-elasticsearch</url>
+        <url>https://travis-ci.org/dropwizard/dropwizard-elasticsearch</url>
     </ciManagement>
 
     <issueManagement>
         <system>GitHub Issues</system>
-        <url>https://github.com/joschi/dropwizard-elasticsearch/issues</url>
+        <url>https://github.com/dropwizard/dropwizard-elasticsearch/issues</url>
     </issueManagement>
 
     <distributionManagement>
         <site>
             <id>dropwizard-elasticsearch-site</id>
-            <url>http://joschi.github.io/dropwizard-elasticsearch/${project.version}</url>
+            <url>http://dropwizard.github.io/dropwizard-elasticsearch/${project.version}</url>
         </site>
     </distributionManagement>
 
