@@ -47,7 +47,7 @@
 
     <distributionManagement>
         <site>
-            <id>dropwizard-elasticsearch-site</id>
+            <id>dropwizard-elasticsearch</id>
             <url>http://dropwizard.github.io/dropwizard-elasticsearch/${project.version}</url>
         </site>
     </distributionManagement>
@@ -139,26 +139,6 @@
                         <id>attach-javadocs</id>
                         <goals>
                             <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!--  use mvn versions:display-dependency-updates versions:display-plugin-updates -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
                         </goals>
                     </execution>
                 </executions>
