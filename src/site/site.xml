@@ -9,7 +9,7 @@
     <custom>
         <fluidoSkin>
             <gitHub>
-                <projectId>joschi/dropwizard-elasticsearch</projectId>
+                <projectId>dropwizard/dropwizard-elasticsearch</projectId>
                 <ribbonOrientation>right</ribbonOrientation>
                 <ribbonColor>red</ribbonColor>
             </gitHub>
