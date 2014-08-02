@@ -1,8 +1,8 @@
 Dropwizard Elasticsearch
 ========================
 
-[![Build Status](https://travis-ci.org/joschi/dropwizard-elasticsearch.svg?branch=master)](https://travis-ci.org/joschi/dropwizard-elasticsearch)
-[![Coverage Status](https://img.shields.io/coveralls/joschi/dropwizard-elasticsearch.svg)](https://coveralls.io/r/joschi/dropwizard-elasticsearch)
+[![Build Status](https://travis-ci.org/dropwizard/dropwizard-elasticsearch.svg?branch=master)](https://travis-ci.org/dropwizard/dropwizard-elasticsearch)
+[![Coverage Status](https://img.shields.io/coveralls/dropwizard/dropwizard-elasticsearch.svg)](https://coveralls.io/r/dropwizard/dropwizard-elasticsearch)
 
 A set of classes for using [Elasticsearch] [1] in a [Dropwizard] [2] application.
 
@@ -10,28 +10,28 @@ The package provides a [lifecycle-managed] [3] client class (`ManagedEsClient`),
 common options (`EsConfiguration`), and some [health checks] [4] which can instantly be used in any Dropwizard application.
 
 [1]: http://www.elasticsearch.org/
-[2]: http://www.dropwizard.io/
-[3]: http://www.dropwizard.io/manual/core.html#managed-objects
-[4]: http://www.dropwizard.io/manual/core.html#health-checks
+[2]: http://dropwizard.io/0.7.1/docs
+[3]: http://dropwizard.io/0.7.1/docs/manual/core.html#managed-objects
+[4]: http://dropwizard.io/0.7.1/docs/manual/core.html#health-checks
 
 
 Usage
 -----
 
-Just add `EsConfiguration` to your [Configuration](http://dropwizard.codahale.com/manual/core/#configuration) class and
+Just add `EsConfiguration` to your [Configuration](http://dropwizard.io/0.7.1/docs/manual/core.html#configuration) class and
 create an `ManagedEsClient` instance in the run method of your service.
 
-You can also add one of the existing health checks to your [Environment](http://dropwizard.codahale.com/manual/core/#environments)
+You can also add one of the existing health checks to your [Environment](http://dropwizard.io/0.7.1/docs/manual/core.html#environments)
 in the same method. At least the usage of `EsClusterHealthCheck` is strongly advised.
 
 
-    public class DemoService extends Service<DemoConfiguration> {
+    public class DemoApplication extends Application<DemoConfiguration> {
         // [...]
         @Override
         public void run(DemoConfiguration config, Environment environment) {
             final ManagedEsClient managedClient = new ManagedEsClient(configuration.getEsConfiguration());
             environment.lifecycle().manage(managedClient);
-            environment.healthChecks().register("Cluster health", new EsClusterHealthCheck(managedClient.getClient()));
+            environment.healthChecks().register("ES cluster health", new EsClusterHealthCheck(managedClient.getClient()));
             // [...]
         }
     }
@@ -54,12 +54,6 @@ An example configuration file for creating a Node Client could like this:
       node.name: MyCustomNodeName
 
 
-Drawbacks
----------
-
-None known. :)
-
-
 Maven Artifacts
 ---------------
 
@@ -67,16 +61,16 @@ This project is available on Maven Central. To add it to your project simply add
 `pom.xml`:
 
     <dependency>
-      <groupId>com.github.joschi</groupId>
+      <groupId>io.dropwizard.modules</groupId>
       <artifactId>dropwizard-elasticsearch</artifactId>
-      <version>0.4.0</version>
+      <version>0.7.0-1</version>
     </dependency>
 
 
 Support
 -------
 
-Please file bug reports and feature requests in [GitHub issues](https://github.com/joschi/dropwizard-elasticsearch/issues).
+Please file bug reports and feature requests in [GitHub issues](https://github.com/dropwizard/dropwizard-elasticsearch/issues).
 
 
 Acknowledgements
