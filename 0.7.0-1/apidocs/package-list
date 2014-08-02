@@ -1,0 +1,4 @@
+io.dropwizard.elasticsearch.config
+io.dropwizard.elasticsearch.health
+io.dropwizard.elasticsearch.managed
+io.dropwizard.elasticsearch.util
