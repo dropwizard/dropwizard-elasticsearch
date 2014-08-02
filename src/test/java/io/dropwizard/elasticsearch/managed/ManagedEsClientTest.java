@@ -1,6 +1,6 @@
-package com.github.joschi.dropwizard.elasticsearch.managed;
+package io.dropwizard.elasticsearch.managed;
 
-import com.github.joschi.dropwizard.elasticsearch.config.EsConfiguration;
+import io.dropwizard.elasticsearch.config.EsConfiguration;
 import io.dropwizard.configuration.ConfigurationException;
 import io.dropwizard.configuration.ConfigurationFactory;
 import io.dropwizard.jackson.Jackson;

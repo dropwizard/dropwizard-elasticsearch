@@ -1,4 +1,4 @@
-package com.github.joschi.dropwizard.elasticsearch.config;
+package io.dropwizard.elasticsearch.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.net.HostAndPort;

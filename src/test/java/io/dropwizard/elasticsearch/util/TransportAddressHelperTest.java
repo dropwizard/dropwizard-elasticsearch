@@ -1,4 +1,4 @@
-package com.github.joschi.dropwizard.elasticsearch.util;
+package io.dropwizard.elasticsearch.util;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HostAndPort;

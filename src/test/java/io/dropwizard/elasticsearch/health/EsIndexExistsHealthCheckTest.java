@@ -1,4 +1,4 @@
-package com.github.joschi.dropwizard.elasticsearch.health;
+package io.dropwizard.elasticsearch.health;
 
 import com.google.common.collect.ImmutableList;
 import org.elasticsearch.client.Client;

@@ -1,4 +1,4 @@
-package com.github.joschi.dropwizard.elasticsearch.config;
+package io.dropwizard.elasticsearch.config;
 
 import io.dropwizard.configuration.ConfigurationException;
 import io.dropwizard.configuration.ConfigurationFactory;

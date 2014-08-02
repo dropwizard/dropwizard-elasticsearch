@@ -1,4 +1,4 @@
-package com.github.joschi.dropwizard.elasticsearch.health;
+package io.dropwizard.elasticsearch.health;
 
 import com.codahale.metrics.health.HealthCheck;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
