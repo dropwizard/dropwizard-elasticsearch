@@ -10,9 +10,9 @@ The package provides a [lifecycle-managed] [3] client class (`ManagedEsClient`),
 common options (`EsConfiguration`), and some [health checks] [4] which can instantly be used in any Dropwizard application.
 
 [1]: http://www.elasticsearch.org/
-[2]: http://dropwizard.io/0.7.1/docs
-[3]: http://dropwizard.io/0.7.1/docs/manual/core.html#managed-objects
-[4]: http://dropwizard.io/0.7.1/docs/manual/core.html#health-checks
+[2]: http://dropwizard.io/0.8.0/docs
+[3]: http://dropwizard.io/0.8.0/docs/manual/core.html#managed-objects
+[4]: http://dropwizard.io/0.8.0/docs/manual/core.html#health-checks
 
 
 Usage
@@ -63,7 +63,7 @@ This project is available on Maven Central. To add it to your project simply add
     <dependency>
       <groupId>io.dropwizard.modules</groupId>
       <artifactId>dropwizard-elasticsearch</artifactId>
-      <version>0.7.0-1</version>
+      <version>0.8.0-1</version>
     </dependency>
 
 
@@ -83,7 +83,7 @@ which sparked the idea for this project.
 License
 -------
 
-Copyright (c) 2013-2014 Jochen Schalanda
+Copyright (c) 2013-2015 Jochen Schalanda
 
 This library is licensed under the Apache License, Version 2.0.
 
