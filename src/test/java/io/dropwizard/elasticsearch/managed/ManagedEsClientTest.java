@@ -1,14 +1,17 @@
 package io.dropwizard.elasticsearch.managed;
 
+import com.google.common.net.HostAndPort;
 import io.dropwizard.elasticsearch.config.EsConfiguration;
 import io.dropwizard.configuration.ConfigurationException;
 import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.elasticsearch.util.TransportAddressHelper;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.lifecycle.Managed;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.node.Node;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.validation.Validation;
@@ -67,9 +70,9 @@ public class ManagedEsClientTest {
         Managed managed = new ManagedEsClient(node);
 
         managed.start();
-        managed.stop();
-
         verify(node).start();
+
+        managed.stop();
         verify(node).close();
     }
 
@@ -95,6 +98,11 @@ public class ManagedEsClientTest {
 
         assertNotNull(client);
         assertTrue(client instanceof NodeClient);
+
+        NodeClient nodeClient = (NodeClient) client;
+        assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
+        assertEquals("true", nodeClient.settings().get("node.client"));
+        assertEquals("false", nodeClient.settings().get("node.data"));
     }
 
     @Test
@@ -108,6 +116,17 @@ public class ManagedEsClientTest {
 
         assertNotNull(client);
         assertTrue(client instanceof TransportClient);
-        assertEquals(3, ((TransportClient) client).transportAddresses().size());
+
+        final TransportClient transportClient = (TransportClient) client;
+        assertEquals(3, transportClient.transportAddresses().size());
+        assertEquals(
+                TransportAddressHelper.fromHostAndPort(HostAndPort.fromParts("127.0.0.1", 9300)),
+                transportClient.transportAddresses().get(0));
+        assertEquals(
+                TransportAddressHelper.fromHostAndPort(HostAndPort.fromParts("127.0.0.1", 9301)),
+                transportClient.transportAddresses().get(1));
+        assertEquals(
+                TransportAddressHelper.fromHostAndPort(HostAndPort.fromParts("127.0.0.1", 9302)),
+                transportClient.transportAddresses().get(2));
     }
 }

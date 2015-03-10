@@ -42,6 +42,7 @@ public class ManagedEsClient implements Managed {
         if (config.isNodeClient()) {
             this.node = nodeBuilder()
                     .client(true)
+                    .data(false)
                     .settings(settings)
                     .build();
             this.client = this.node.client();
