@@ -1,5 +1,6 @@
 package io.dropwizard.elasticsearch.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.net.HostAndPort;
 import io.dropwizard.validation.ValidationMethod;
@@ -46,6 +47,7 @@ public class EsConfiguration {
     }
 
     @ValidationMethod
+    @JsonIgnore
     public boolean isValidConfig() {
         return nodeClient || !servers.isEmpty();
     }
