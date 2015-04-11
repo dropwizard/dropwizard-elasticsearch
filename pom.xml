@@ -58,12 +58,17 @@
             <name>Jochen Schalanda</name>
             <email>jochen@schalanda.name</email>
         </developer>
+        <developer>
+            <id>adben</id>
+            <name>Adolfo Benedetti</name>
+            <email>adolfo.benedetti@gmail.com</email>
+        </developer>
     </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dropwizard.version>0.8.0</dropwizard.version>
-        <elasticsearch.version>1.4.4</elasticsearch.version>
+        <dropwizard.version>0.8.1</dropwizard.version>
+        <elasticsearch.version>1.5.1</elasticsearch.version>
     </properties>
 
     <dependencies>
