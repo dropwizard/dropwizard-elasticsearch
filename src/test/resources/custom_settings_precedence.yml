@@ -1,0 +1,5 @@
+clusterName: dropwizard_elasticsearch_test
+settingsFile: elasticsearch_precedence.yml
+settings:
+  cluster.name: settingsYaml
+  transport.tcp.port: 29300-29400

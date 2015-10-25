@@ -11,6 +11,7 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.node.Node;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 /**
@@ -34,7 +35,12 @@ public class ManagedEsClient implements Managed {
     public ManagedEsClient(final EsConfiguration config) {
         checkNotNull(config, "EsConfiguration must not be null");
 
-        final Settings settings = ImmutableSettings.settingsBuilder()
+        final ImmutableSettings.Builder settingsBuilder = ImmutableSettings.settingsBuilder();
+        if(!isNullOrEmpty(config.getSettingsFile())) {
+            settingsBuilder.loadFromClasspath(config.getSettingsFile());
+        }
+
+        final Settings settings = settingsBuilder
                 .put(config.getSettings())
                 .put("cluster.name", config.getClusterName())
                 .build();

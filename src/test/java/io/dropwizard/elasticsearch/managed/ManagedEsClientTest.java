@@ -1,9 +1,9 @@
 package io.dropwizard.elasticsearch.managed;
 
 import com.google.common.net.HostAndPort;
-import io.dropwizard.elasticsearch.config.EsConfiguration;
 import io.dropwizard.configuration.ConfigurationException;
 import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.elasticsearch.config.EsConfiguration;
 import io.dropwizard.elasticsearch.util.TransportAddressHelper;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.lifecycle.Managed;
@@ -11,7 +11,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.node.Node;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.validation.Validation;
@@ -128,5 +127,39 @@ public class ManagedEsClientTest {
         assertEquals(
                 TransportAddressHelper.fromHostAndPort(HostAndPort.fromParts("127.0.0.1", 9302)),
                 transportClient.transportAddresses().get(2));
+    }
+
+    @Test
+    public void managedClientShouldUseCustomElasticsearchConfig() throws URISyntaxException, IOException, ConfigurationException {
+        URL configFileUrl = this.getClass().getResource("/custom_settings_file.yml");
+        File configFile = new File(configFileUrl.toURI());
+        EsConfiguration config = configFactory.build(configFile);
+
+        ManagedEsClient managedEsClient = new ManagedEsClient(config);
+        Client client = managedEsClient.getClient();
+
+        assertNotNull(client);
+        assertTrue(client instanceof NodeClient);
+
+        NodeClient nodeClient = (NodeClient) client;
+        assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
+        assertEquals("19300-19400", nodeClient.settings().get("transport.tcp.port"));
+    }
+
+    @Test
+    public void managedClientObeysPrecedenceOfSettings() throws URISyntaxException, IOException, ConfigurationException {
+        URL configFileUrl = this.getClass().getResource("/custom_settings_precedence.yml");
+        File configFile = new File(configFileUrl.toURI());
+        EsConfiguration config = configFactory.build(configFile);
+
+        ManagedEsClient managedEsClient = new ManagedEsClient(config);
+        Client client = managedEsClient.getClient();
+
+        assertNotNull(client);
+        assertTrue(client instanceof NodeClient);
+
+        NodeClient nodeClient = (NodeClient) client;
+        assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
+        assertEquals("29300-29400", nodeClient.settings().get("transport.tcp.port"));
     }
 }

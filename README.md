@@ -46,6 +46,7 @@ The following configuration settings are supported by `EsConfiguration`:
 * `servers`: A list of servers for usage with the created TransportClient if `nodeClient` is `false`
 * `clusterName`: The name of the Elasticsearch cluster; default: "elasticsearch"
 * `settings`: Any additional settings for Elasticsearch, see [Configuration](http://www.elasticsearch.org/guide/reference/setup/configuration/)
+* `settingsFile`: Any additional settings file for Elasticsearch, see [Configuration](http://www.elasticsearch.org/guide/reference/setup/configuration/)
 
 An example configuration file for creating a Node Client could like this:
 
@@ -53,6 +54,9 @@ An example configuration file for creating a Node Client could like this:
     settings:
       node.name: MyCustomNodeName
 
+The order of precedence is: `nodeClient`/`servers`/`clusterName` > `settings` > `settingsFile`, meaning that
+any setting in `settingsFile` can be overwritten with `settings` which in turn get overwritten by the specific settings
+like `clusterName`.
 
 Maven Artifacts
 ---------------

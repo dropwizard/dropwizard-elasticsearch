@@ -30,6 +30,9 @@ public class EsConfiguration {
     @NotNull
     private Map<String, String> settings = Collections.emptyMap();
 
+    @JsonProperty
+    private String settingsFile = null;
+
     public List<HostAndPort> getServers() {
         return servers;
     }
@@ -44,6 +47,10 @@ public class EsConfiguration {
 
     public Map<String, String> getSettings() {
         return settings;
+    }
+
+    public String getSettingsFile() {
+        return settingsFile;
     }
 
     @ValidationMethod
