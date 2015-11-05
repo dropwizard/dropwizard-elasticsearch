@@ -68,8 +68,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-        <dropwizard.version>0.9.0</dropwizard.version>
-        <elasticsearch.version>1.7.3</elasticsearch.version>
+        <dropwizard.version>0.9.1</dropwizard.version>
+        <elasticsearch.version>2.0.0</elasticsearch.version>
     </properties>
 
     <dependencyManagement>

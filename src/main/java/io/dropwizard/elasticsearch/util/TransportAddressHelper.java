@@ -1,9 +1,11 @@
 package io.dropwizard.elasticsearch.util;
 
 import com.google.common.net.HostAndPort;
+
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 
 /**
@@ -20,7 +22,8 @@ public class TransportAddressHelper {
      * @return a {@link TransportAddress} equivalent to the provided {@link HostAndPort} instance
      */
     public static TransportAddress fromHostAndPort(final HostAndPort hostAndPort) {
-        return new InetSocketTransportAddress(hostAndPort.getHostText(), hostAndPort.getPortOrDefault(DEFAULT_PORT));
+    	InetSocketAddress address = new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPortOrDefault(DEFAULT_PORT));
+        return new InetSocketTransportAddress(address);
     }
 
     /**

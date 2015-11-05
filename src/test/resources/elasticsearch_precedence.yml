@@ -1,2 +1,3 @@
 cluster.name: settingsFile
 transport.tcp.port: 19300-19400
+path.home: "target/data/settings"
