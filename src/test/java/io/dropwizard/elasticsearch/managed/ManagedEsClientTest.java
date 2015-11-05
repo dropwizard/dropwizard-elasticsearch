@@ -161,5 +161,6 @@ public class ManagedEsClientTest {
         NodeClient nodeClient = (NodeClient) client;
         assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
         assertEquals("29300-29400", nodeClient.settings().get("transport.tcp.port"));
+        assertEquals("target/data/yaml", nodeClient.settings().get("path.home"));
     }
 }

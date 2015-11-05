@@ -5,10 +5,15 @@ import io.dropwizard.elasticsearch.util.TransportAddressHelper;
 import io.dropwizard.lifecycle.Managed;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.node.Node;
+
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -35,9 +40,18 @@ public class ManagedEsClient implements Managed {
     public ManagedEsClient(final EsConfiguration config) {
         checkNotNull(config, "EsConfiguration must not be null");
 
-        final ImmutableSettings.Builder settingsBuilder = ImmutableSettings.settingsBuilder();
-        if(!isNullOrEmpty(config.getSettingsFile())) {
-            settingsBuilder.loadFromClasspath(config.getSettingsFile());
+        final Settings.Builder settingsBuilder = Settings.builder();
+        if (!isNullOrEmpty(config.getSettingsFile())) {
+            Path path = Paths.get(config.getSettingsFile());
+            if (!path.toFile().exists()) {
+                try {
+                    URL url = this.getClass().getClassLoader().getResource(config.getSettingsFile());
+                    path = new File(url.toURI()).toPath();
+                } catch (URISyntaxException | NullPointerException e) {
+                    throw new IllegalArgumentException("settings file cannot be found");
+                }
+            }
+            settingsBuilder.loadFromPath(path);
         }
 
         final Settings settings = settingsBuilder
@@ -54,7 +68,7 @@ public class ManagedEsClient implements Managed {
             this.client = this.node.client();
         } else {
             final TransportAddress[] addresses = TransportAddressHelper.fromHostAndPorts(config.getServers());
-            this.client = new TransportClient(settings).addTransportAddresses(addresses);
+            this.client = TransportClient.builder().settings(settings).build().addTransportAddresses(addresses);
         }
     }
 
