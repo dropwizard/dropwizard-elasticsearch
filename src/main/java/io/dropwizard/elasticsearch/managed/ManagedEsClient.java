@@ -1,5 +1,6 @@
 package io.dropwizard.elasticsearch.managed;
 
+import com.google.common.io.Resources;
 import io.dropwizard.elasticsearch.config.EsConfiguration;
 import io.dropwizard.elasticsearch.util.TransportAddressHelper;
 import io.dropwizard.lifecycle.Managed;
@@ -45,10 +46,10 @@ public class ManagedEsClient implements Managed {
             Path path = Paths.get(config.getSettingsFile());
             if (!path.toFile().exists()) {
                 try {
-                    URL url = this.getClass().getClassLoader().getResource(config.getSettingsFile());
+                    final URL url = Resources.getResource(config.getSettingsFile());
                     path = new File(url.toURI()).toPath();
                 } catch (URISyntaxException | NullPointerException e) {
-                    throw new IllegalArgumentException("settings file cannot be found");
+                    throw new IllegalArgumentException("settings file cannot be found", e);
                 }
             }
             settingsBuilder.loadFromPath(path);
