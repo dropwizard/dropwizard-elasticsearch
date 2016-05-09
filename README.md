@@ -5,24 +5,24 @@ Dropwizard Elasticsearch
 [![Coverage Status](https://img.shields.io/coveralls/dropwizard/dropwizard-elasticsearch.svg)](https://coveralls.io/r/dropwizard/dropwizard-elasticsearch)
 [![Maven Central](https://img.shields.io/maven-central/v/io.dropwizard.modules/dropwizard-elasticsearch.svg)](http://mvnrepository.com/artifact/io.dropwizard.modules/dropwizard-elasticsearch)
 
-A set of classes for using [Elasticsearch] [1] in a [Dropwizard] [2] application.
+A set of classes for using [Elasticsearch] [1] (version 2.3.0 and higher) in a [Dropwizard] [2] application.
 
 The package provides a [lifecycle-managed] [3] client class (`ManagedEsClient`), a configuration class with the most
 common options (`EsConfiguration`), and some [health checks] [4] which can instantly be used in any Dropwizard application.
 
 [1]: http://www.elasticsearch.org/
-[2]: http://dropwizard.io/0.9.1/docs
-[3]: http://dropwizard.io/0.9.1/docs/manual/core.html#managed-objects
-[4]: http://dropwizard.io/0.9.1/docs/manual/core.html#health-checks
+[2]: http://dropwizard.io/0.9.2/docs
+[3]: http://dropwizard.io/0.9.2/docs/manual/core.html#managed-objects
+[4]: http://dropwizard.io/0.9.2/docs/manual/core.html#health-checks
 
 
 Usage
 -----
 
-Just add `EsConfiguration` to your [Configuration](http://dropwizard.io/0.9.1/docs/manual/core.html#configuration) class and
+Just add `EsConfiguration` to your [Configuration](http://dropwizard.io/0.9.2/docs/manual/core.html#configuration) class and
 create an `ManagedEsClient` instance in the run method of your service.
 
-You can also add one of the existing health checks to your [Environment](http://dropwizard.io/0.9.1/docs/manual/core.html#environments)
+You can also add one of the existing health checks to your [Environment](http://dropwizard.io/0.9.2/docs/manual/core.html#environments)
 in the same method. At least the usage of `EsClusterHealthCheck` is strongly advised.
 
 
@@ -46,8 +46,8 @@ The following configuration settings are supported by `EsConfiguration`:
 * `nodeClient`: When `true`, `ManagedEsClient` will create a `NodeClient`, otherwise a `TransportClient`; default: `true`
 * `servers`: A list of servers for usage with the created TransportClient if `nodeClient` is `false`
 * `clusterName`: The name of the Elasticsearch cluster; default: "elasticsearch"
-* `settings`: Any additional settings for Elasticsearch, see [Configuration](https://www.elastic.co/guide/en/elasticsearch/reference/2.1/setup-configuration.html)
-* `settingsFile`: Any additional settings file for Elasticsearch, see [Configuration](https://www.elastic.co/guide/en/elasticsearch/reference/2.1/setup-configuration.html)
+* `settings`: Any additional settings for Elasticsearch, see [Configuration](https://www.elastic.co/guide/en/elasticsearch/reference/2.3/setup-configuration.html)
+* `settingsFile`: Any additional settings file for Elasticsearch, see [Configuration](https://www.elastic.co/guide/en/elasticsearch/reference/2.3/setup-configuration.html)
 
 An example configuration file for creating a Node Client could like this:
 
@@ -68,7 +68,7 @@ This project is available on Maven Central. To add it to your project simply add
     <dependency>
       <groupId>io.dropwizard.modules</groupId>
       <artifactId>dropwizard-elasticsearch</artifactId>
-      <version>0.9.1-1</version>
+      <version>0.9.2-1</version>
     </dependency>
 
 
@@ -88,7 +88,7 @@ which sparked the idea for this project.
 License
 -------
 
-Copyright (c) 2013-2015 Jochen Schalanda
+Copyright (c) 2013-2016 Jochen Schalanda
 
 This library is licensed under the Apache License, Version 2.0.
 
