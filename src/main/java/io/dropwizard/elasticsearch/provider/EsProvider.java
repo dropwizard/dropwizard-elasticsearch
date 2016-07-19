@@ -38,7 +38,6 @@ public class EsProvider implements Factory<Client> {
 
     @Override
     public void dispose(Client client) {
-        client.close();
     }
 
 }
