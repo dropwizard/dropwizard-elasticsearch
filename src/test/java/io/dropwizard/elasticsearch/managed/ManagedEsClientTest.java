@@ -3,6 +3,7 @@ package io.dropwizard.elasticsearch.managed;
 import com.google.common.net.HostAndPort;
 import io.dropwizard.configuration.ConfigurationException;
 import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.configuration.DefaultConfigurationFactoryFactory;
 import io.dropwizard.elasticsearch.config.EsConfiguration;
 import io.dropwizard.elasticsearch.util.TransportAddressHelper;
 import io.dropwizard.jackson.Jackson;
@@ -34,7 +35,8 @@ import static org.mockito.Mockito.when;
 public class ManagedEsClientTest {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     private final ConfigurationFactory<EsConfiguration> configFactory =
-            new ConfigurationFactory<>(EsConfiguration.class, validator, Jackson.newObjectMapper(), "dw");
+            new DefaultConfigurationFactoryFactory<EsConfiguration>()
+                    .create(EsConfiguration.class, validator, Jackson.newObjectMapper(), "dw");
 
     @Test(expected = NullPointerException.class)
     public void ensureEsConfigurationIsNotNull() {

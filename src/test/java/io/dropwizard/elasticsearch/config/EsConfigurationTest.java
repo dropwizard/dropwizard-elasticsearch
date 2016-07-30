@@ -2,6 +2,7 @@ package io.dropwizard.elasticsearch.config;
 
 import io.dropwizard.configuration.ConfigurationException;
 import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.configuration.DefaultConfigurationFactoryFactory;
 import io.dropwizard.jackson.Jackson;
 import org.junit.Test;
 
@@ -18,7 +19,8 @@ import java.net.URL;
 public class EsConfigurationTest {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     private final ConfigurationFactory<EsConfiguration> configFactory =
-            new ConfigurationFactory<>(EsConfiguration.class, validator, Jackson.newObjectMapper(), "dw");
+            new DefaultConfigurationFactoryFactory<EsConfiguration>()
+                    .create(EsConfiguration.class, validator, Jackson.newObjectMapper(), "dw");
 
     @Test
     public void defaultConfigShouldBeValid() throws IOException, ConfigurationException {
