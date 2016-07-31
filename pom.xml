@@ -191,6 +191,11 @@
                     <artifactId>coveralls-maven-plugin</artifactId>
                     <version>4.2.0</version>
                 </plugin>
+                <plugin>
+                    <groupId>com.versioneye</groupId>
+                    <artifactId>versioneye-maven-plugin</artifactId>
+                    <version>3.10.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -235,6 +240,14 @@
             <plugin>
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.versioneye</groupId>
+                <artifactId>versioneye-maven-plugin</artifactId>
+                <configuration>
+                    <organisation>Dropwizard</organisation>
+                    <projectId>570f8c70fcd19a0039f16c7f</projectId>
+                </configuration>
             </plugin>
         </plugins>
     </build>

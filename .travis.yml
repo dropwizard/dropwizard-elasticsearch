@@ -1,6 +1,13 @@
 sudo: false
 language: java
-after_success:
-  - bash .travis_after_success.sh
 jdk:
   - oraclejdk8
+env:
+  global:
+    - secure: "kUXw8k5q9o6uf41aVDBHp02MjxXDRkuId3aLujD3tZ69MGem3tkqPMwQIphBobTF+OTG5XjQteHQa/t3Htv3+JnYmWKJNksOt0b/fsZklnJQO2kqXpMhKhRICJPgFIcKl/OH/YkjX01YdVgcJx4tAjAV6mqs9AF/C+iXZT6fKoU="
+install:
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+script:
+  - mvn test versioneye:securityAndLicenseCheck -B
+after_success:
+  - mvn jacoco:report coveralls:report -B
