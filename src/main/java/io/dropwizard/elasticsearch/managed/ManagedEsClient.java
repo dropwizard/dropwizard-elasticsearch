@@ -9,16 +9,21 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.node.Node;
+import org.elasticsearch.node.NodeValidationException;
+import org.elasticsearch.node.internal.InternalSettingsPreparer;
+import org.elasticsearch.transport.Netty4Plugin;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 /**
  * A Dropwizard managed Elasticsearch {@link Client}. Depending on the {@link EsConfiguration} a Node Client or
@@ -38,7 +43,7 @@ public class ManagedEsClient implements Managed {
      *
      * @param config a valid {@link EsConfiguration} instance
      */
-    public ManagedEsClient(final EsConfiguration config) {
+    public ManagedEsClient(final EsConfiguration config) throws IOException {
         checkNotNull(config, "EsConfiguration must not be null");
 
         final Settings.Builder settingsBuilder = Settings.builder();
@@ -58,18 +63,17 @@ public class ManagedEsClient implements Managed {
         final Settings settings = settingsBuilder
                 .put(config.getSettings())
                 .put("cluster.name", config.getClusterName())
+                .put(Node.NODE_DATA_SETTING.getKey(), false)
+                .put(Node.NODE_MASTER_SETTING.getKey(), false)
+                .put(Node.NODE_INGEST_SETTING.getKey(), false)
                 .build();
 
         if (config.isNodeClient()) {
-            this.node = nodeBuilder()
-                    .client(true)
-                    .data(false)
-                    .settings(settings)
-                    .build();
+            this.node = new PluginNode(settings);
             this.client = this.node.client();
         } else {
             final TransportAddress[] addresses = TransportAddressHelper.fromHostAndPorts(config.getServers());
-            this.client = TransportClient.builder().settings(settings).build().addTransportAddresses(addresses);
+            this.client = new PreBuiltTransportClient(settings).addTransportAddresses(addresses);
         }
     }
 
@@ -124,7 +128,7 @@ public class ManagedEsClient implements Managed {
         return client;
     }
 
-    private Node startNode() {
+    private Node startNode() throws NodeValidationException {
         if (null != node) {
             return node.start();
         }
@@ -132,7 +136,7 @@ public class ManagedEsClient implements Managed {
         return null;
     }
 
-    private void closeNode() {
+    private void closeNode() throws IOException {
         if (null != node && !node.isClosed()) {
             node.close();
         }
@@ -141,6 +145,12 @@ public class ManagedEsClient implements Managed {
     private void closeClient() {
         if (null != client) {
             client.close();
+        }
+    }
+
+    static class PluginNode extends Node {
+        PluginNode(Settings settings) {
+            super(InternalSettingsPreparer.prepareEnvironment(settings, null), Collections.singletonList(Netty4Plugin.class));
         }
     }
 }

@@ -12,6 +12,8 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.node.Node;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.validation.Validation;
@@ -38,8 +40,22 @@ public class ManagedEsClientTest {
             new DefaultConfigurationFactoryFactory<EsConfiguration>()
                     .create(EsConfiguration.class, validator, Jackson.newObjectMapper(), "dw");
 
+    private ManagedEsClient managedEsClient;
+
+    @Before
+    public void setup() {
+        managedEsClient = null;
+    }
+
+    @After
+    public void closeClient() throws Exception {
+        if (managedEsClient != null) {
+            managedEsClient.stop();
+        }
+    }
+
     @Test(expected = NullPointerException.class)
-    public void ensureEsConfigurationIsNotNull() {
+    public void ensureEsConfigurationIsNotNull() throws Exception {
         new ManagedEsClient((EsConfiguration) null);
     }
 
@@ -94,7 +110,7 @@ public class ManagedEsClientTest {
         File configFile = new File(configFileUrl.toURI());
         EsConfiguration config = configFactory.build(configFile);
 
-        ManagedEsClient managedEsClient = new ManagedEsClient(config);
+        managedEsClient = new ManagedEsClient(config);
         Client client = managedEsClient.getClient();
 
         assertNotNull(client);
@@ -102,8 +118,9 @@ public class ManagedEsClientTest {
 
         NodeClient nodeClient = (NodeClient) client;
         assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
-        assertEquals("true", nodeClient.settings().get("node.client"));
         assertEquals("false", nodeClient.settings().get("node.data"));
+        assertEquals("false", nodeClient.settings().get("node.master"));
+        assertEquals("false", nodeClient.settings().get("node.ingest"));
     }
 
     @Test
@@ -112,7 +129,7 @@ public class ManagedEsClientTest {
         File configFile = new File(configFileUrl.toURI());
         EsConfiguration config = configFactory.build(configFile);
 
-        ManagedEsClient managedEsClient = new ManagedEsClient(config);
+        managedEsClient = new ManagedEsClient(config);
         Client client = managedEsClient.getClient();
 
         assertNotNull(client);
@@ -137,7 +154,7 @@ public class ManagedEsClientTest {
         File configFile = new File(configFileUrl.toURI());
         EsConfiguration config = configFactory.build(configFile);
 
-        ManagedEsClient managedEsClient = new ManagedEsClient(config);
+        managedEsClient = new ManagedEsClient(config);
         Client client = managedEsClient.getClient();
 
         assertNotNull(client);
@@ -154,7 +171,7 @@ public class ManagedEsClientTest {
         File configFile = new File(configFileUrl.toURI());
         EsConfiguration config = configFactory.build(configFile);
 
-        ManagedEsClient managedEsClient = new ManagedEsClient(config);
+        managedEsClient = new ManagedEsClient(config);
         Client client = managedEsClient.getClient();
 
         assertNotNull(client);
