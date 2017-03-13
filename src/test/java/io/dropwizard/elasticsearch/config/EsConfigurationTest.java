@@ -22,8 +22,8 @@ public class EsConfigurationTest {
             new DefaultConfigurationFactoryFactory<EsConfiguration>()
                     .create(EsConfiguration.class, validator, Jackson.newObjectMapper(), "dw");
 
-    @Test
-    public void defaultConfigShouldBeValid() throws IOException, ConfigurationException {
+    @Test(expected = ConfigurationException.class)
+    public void defaultConfigInvalid() throws IOException, ConfigurationException {
         configFactory.build();
     }
 
