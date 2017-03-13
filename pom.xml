@@ -8,7 +8,7 @@
 
     <groupId>io.dropwizard.modules</groupId>
     <artifactId>dropwizard-elasticsearch</artifactId>
-    <version>1.0.0-2-ES5-SNAPSHOT</version>
+    <version>1.0.0-2-ES5.2.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Dropwizard Elasticsearch Bundle</name>
@@ -68,9 +68,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <log4j.version>2.7</log4j.version>
-        <dropwizard.version>1.0.0</dropwizard.version>
-        <elasticsearch.version>5.0.0</elasticsearch.version>
+        <log4j.version>2.8.1</log4j.version>
+        <dropwizard.version>1.0.6</dropwizard.version>
+        <elasticsearch.version>5.2.2</elasticsearch.version>
     </properties>
 
     <dependencyManagement>
@@ -94,16 +94,22 @@
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>transport</artifactId>
             <version>${elasticsearch.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.elasticsearch.plugin</groupId>
             <artifactId>transport-netty4-client</artifactId>
             <version>${elasticsearch.version}</version>
         </dependency>
-        <!-- Required for ES 5.0 -->
+        <!-- Required for ES 5.x -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
+            <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j.version}</version>
         </dependency>
         <dependency>
