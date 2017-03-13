@@ -1,2 +1,3 @@
 clusterName: dropwizard_elasticsearch_test
 settingsFile: elasticsearch.yml
+nodeClient: true

@@ -8,6 +8,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.env.NodeEnvironment;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeValidationException;
 import org.elasticsearch.node.internal.InternalSettingsPreparer;
@@ -69,8 +70,7 @@ public class ManagedEsClient implements Managed {
                 .build();
 
         if (config.isNodeClient()) {
-            this.node = new PluginNode(settings);
-            this.client = this.node.client();
+            throw new IllegalArgumentException("Node client is not allowed for Elasticsearch 5. Use a local coordinating node, and the transport client.");
         } else {
             final TransportAddress[] addresses = TransportAddressHelper.fromHostAndPorts(config.getServers());
             this.client = new PreBuiltTransportClient(settings).addTransportAddresses(addresses);
@@ -150,7 +150,8 @@ public class ManagedEsClient implements Managed {
 
     static class PluginNode extends Node {
         PluginNode(Settings settings) {
-            super(InternalSettingsPreparer.prepareEnvironment(settings, null), Collections.singletonList(Netty4Plugin.class));
+            super(InternalSettingsPreparer.prepareEnvironment(settings, null),
+                    Collections.singletonList(Netty4Plugin.class));
         }
     }
 }

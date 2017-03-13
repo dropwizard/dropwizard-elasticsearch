@@ -14,6 +14,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.node.Node;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.validation.Validation;
@@ -23,10 +24,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -105,6 +103,20 @@ public class ManagedEsClientTest {
     }
 
     @Test
+    public void nodeClientDisallowed() throws URISyntaxException, IOException, ConfigurationException {
+        URL configFileUrl = this.getClass().getResource("/node_client.yml");
+        File configFile = new File(configFileUrl.toURI());
+        EsConfiguration config = configFactory.build(configFile);
+
+        try {
+            managedEsClient = new ManagedEsClient(config);
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
+    }
+
+    @Test @Ignore
     public void nodeClientShouldBeCreatedFromConfig() throws URISyntaxException, IOException, ConfigurationException {
         URL configFileUrl = this.getClass().getResource("/node_client.yml");
         File configFile = new File(configFileUrl.toURI());
@@ -148,7 +160,7 @@ public class ManagedEsClientTest {
                 transportClient.transportAddresses().get(2));
     }
 
-    @Test
+    @Test @Ignore
     public void managedClientShouldUseCustomElasticsearchConfig() throws URISyntaxException, IOException, ConfigurationException {
         URL configFileUrl = this.getClass().getResource("/custom_settings_file.yml");
         File configFile = new File(configFileUrl.toURI());
@@ -165,7 +177,7 @@ public class ManagedEsClientTest {
         assertEquals("19300-19400", nodeClient.settings().get("transport.tcp.port"));
     }
 
-    @Test
+    @Test @Ignore
     public void managedClientObeysPrecedenceOfSettings() throws URISyntaxException, IOException, ConfigurationException {
         URL configFileUrl = this.getClass().getResource("/custom_settings_precedence.yml");
         File configFile = new File(configFileUrl.toURI());

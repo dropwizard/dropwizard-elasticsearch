@@ -24,7 +24,7 @@ public class EsConfiguration {
     private String clusterName = "elasticsearch";
 
     @JsonProperty
-    private boolean nodeClient = true;
+    private boolean nodeClient = false;
 
     @JsonProperty
     @NotNull
