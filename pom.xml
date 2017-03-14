@@ -236,7 +236,7 @@
                 <groupId>com.github.github</groupId>
                 <artifactId>site-maven-plugin</artifactId>
                 <configuration>
-                    <path>${project.version}</path>
+                    <!--<path>${project.version}</path>-->
                     <message>Creating site for ${project.name} ${project.version}</message>
                     <merge>true</merge>
                     <noJekyll>true</noJekyll>
