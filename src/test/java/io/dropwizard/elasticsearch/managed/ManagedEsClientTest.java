@@ -110,8 +110,8 @@ public class ManagedEsClientTest {
 
         try {
             managedEsClient = new ManagedEsClient(config);
-            fail("Expected IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
+            fail("Expected UnsupportedOperationException");
+        } catch (UnsupportedOperationException e) {
             // Expected
         }
     }
