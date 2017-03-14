@@ -5,12 +5,12 @@ Dropwizard Elasticsearch
 [![Coverage Status](https://img.shields.io/coveralls/dropwizard/dropwizard-elasticsearch.svg)](https://coveralls.io/r/dropwizard/dropwizard-elasticsearch)
 [![Maven Central](https://img.shields.io/maven-central/v/io.dropwizard.modules/dropwizard-elasticsearch.svg)](http://mvnrepository.com/artifact/io.dropwizard.modules/dropwizard-elasticsearch)
 
-A set of classes for using [Elasticsearch] [1] (version 2.3.0 and higher) in a [Dropwizard] [2] application.
+A set of classes for using [Elasticsearch] [1] (version 5.2.2 and higher) in a [Dropwizard] [2] application.
 
 The package provides a [lifecycle-managed] [3] client class (`ManagedEsClient`), a configuration class with the most
 common options (`EsConfiguration`), and some [health checks] [4] which can instantly be used in any Dropwizard application.
 
-[1]: http://www.elasticsearch.org/
+[1]: http://www.elastic.co/
 [2]: http://dropwizard.io/1.0.0/docs
 [3]: http://dropwizard.io/1.0.0/docs/manual/core.html#managed-objects
 [4]: http://dropwizard.io/1.0.0/docs/manual/core.html#health-checks
