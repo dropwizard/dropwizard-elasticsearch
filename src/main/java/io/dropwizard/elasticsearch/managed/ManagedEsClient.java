@@ -8,11 +8,8 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.env.NodeEnvironment;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeValidationException;
-import org.elasticsearch.node.internal.InternalSettingsPreparer;
-import org.elasticsearch.transport.Netty4Plugin;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import java.io.File;
@@ -21,17 +18,22 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
- * A Dropwizard managed Elasticsearch {@link Client}. Depending on the {@link EsConfiguration} a Node Client or
- * a {@link TransportClient} a is being created and its lifecycle is managed by Dropwizard.
+ * A Dropwizard managed Elasticsearch {@link Client} for Elasticsearch 5.
  *
- * @see <a href="http://www.elasticsearch.org/guide/reference/java-api/client/#nodeclient">Node Client</a>
- * @see <a href="http://www.elasticsearch.org/guide/reference/java-api/client/#transportclient">Transport Client</a>
+ * Elasticsearch 5 no longer allows using a Node Client to connect to the service. The advice
+ * is to run a local coordinating node (with whichever plugins you require), and to use the
+ * {@link TransportClient} to connect to your cluster via that node.
+ *
+ * If the {@code nodeClient} configuration option is selected, the client will fail and
+ * throw an {@link UnsupportedOperationException}.
+ *
+ * @see <a href="https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/client-connected-to-client-node.html">Connecting a Client to a Coordinating Only Node</a>
+ * @see <a href="https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/transport-client.html">Transport Client</a>
  */
 public class ManagedEsClient implements Managed {
     private Node node = null;
@@ -43,6 +45,9 @@ public class ManagedEsClient implements Managed {
      * as transport addresses.
      *
      * @param config a valid {@link EsConfiguration} instance
+     * @throws IOException if a settings file has been specified and cannot be read.
+     * @throws UnsupportedOperationException if {@code nodeClient=true} has been configured. This version
+     * of Elasticsearch does not provide a NodeClient.
      */
     public ManagedEsClient(final EsConfiguration config) throws IOException {
         checkNotNull(config, "EsConfiguration must not be null");
@@ -70,7 +75,7 @@ public class ManagedEsClient implements Managed {
                 .build();
 
         if (config.isNodeClient()) {
-            throw new IllegalArgumentException("Node client is not allowed for Elasticsearch 5. Use a local coordinating node, and the transport client.");
+            throw new UnsupportedOperationException("Node client is not allowed for Elasticsearch 5. Use a local coordinating node, and the transport client.");
         } else {
             final TransportAddress[] addresses = TransportAddressHelper.fromHostAndPorts(config.getServers());
             this.client = new PreBuiltTransportClient(settings).addTransportAddresses(addresses);
@@ -148,10 +153,4 @@ public class ManagedEsClient implements Managed {
         }
     }
 
-    static class PluginNode extends Node {
-        PluginNode(Settings settings) {
-            super(InternalSettingsPreparer.prepareEnvironment(settings, null),
-                    Collections.singletonList(Netty4Plugin.class));
-        }
-    }
 }
