@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <prerequisites>
@@ -24,15 +25,15 @@
     </licenses>
 
     <scm>
-        <developerConnection>scm:git:git@github.com:dropwizard/dropwizard-elasticsearch.git</developerConnection>
-        <connection>scm:git:https://github.com/dropwizard/dropwizard-elasticsearch.git</connection>
-        <url>https://github.com/dropwizard/dropwizard-elasticsearch</url>
-      <tag>HEAD</tag>
-  </scm>
+        <developerConnection>scm:git:git@github.com:mattflax/dropwizard-elasticsearch.git</developerConnection>
+        <connection>scm:git:https://github.com/mattflax/dropwizard-elasticsearch.git</connection>
+        <url>https://github.com/mattflax/dropwizard-elasticsearch</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <ciManagement>
         <system>Travis CI</system>
-        <url>https://travis-ci.org/dropwizard/dropwizard-elasticsearch</url>
+        <url>https://travis-ci.org/mattflax/dropwizard-elasticsearch</url>
     </ciManagement>
 
     <issueManagement>
@@ -46,8 +47,9 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>internal.repo</id>
+            <name>Temporary Staging Repository</name>
+            <url>file://${project.build.directory}/mvn-repo</url>
         </repository>
         <site>
             <id>dropwizard-elasticsearch</id>
@@ -71,6 +73,8 @@
         <log4j.version>2.8.1</log4j.version>
         <dropwizard.version>1.0.6</dropwizard.version>
         <elasticsearch.version>5.2.2</elasticsearch.version>
+        <!-- github server corresponds to entry in ~/.m2/settings.xml -->
+        <github.global.server>github</github.global.server>
     </properties>
 
     <dependencyManagement>
@@ -163,6 +167,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>2.8.2</version>
+                    <configuration>
+                        <altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -233,6 +240,13 @@
                     <message>Creating site for ${project.name} ${project.version}</message>
                     <merge>true</merge>
                     <noJekyll>true</noJekyll>
+                    <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+                    <branch>refs/heads/mvn-repo</branch>
+                    <includes>
+                        <include>**/*</include>
+                    </includes>
+                    <repositoryName>dropwizard-elasticsearch</repositoryName>
+                    <repositoryOwner>mattflax</repositoryOwner>
                 </configuration>
                 <executions>
                     <execution>
