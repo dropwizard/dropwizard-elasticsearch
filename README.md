@@ -43,7 +43,7 @@ Configuration
 
 The following configuration settings are supported by `EsConfiguration`:
 
-* `nodeClient`: When `true`, `ManagedEsClient` will create a `NodeClient`, otherwise a `TransportClient`; default: `true`
+* `nodeClient`: **DEPRECATED** Will throw an exception if `true`. Default: `false`
 * `servers`: A list of servers for usage with the created TransportClient if `nodeClient` is `false`
 * `clusterName`: The name of the Elasticsearch cluster; default: "elasticsearch"
 * `settings`: Any additional settings for Elasticsearch, see [Configuration](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/setup-configuration.html)
@@ -61,10 +61,10 @@ like `clusterName`.
 
 ### Notes for Elasticsearch 5.x
 
-Elasticsearch 5 specifically recommends **not** using the NodeClient, and it has been disabled in this
-version of the connector.
+Elasticsearch 5 does not allow the creation of a NodeClient, and it is disabled in this version of
+the connector.
 
-The preferred alternative is to launch a local coordinating node, with whichever plugins you require,
+The suggested alternative is to launch a local coordinating node, with whichever plugins you require,
 and use the TransportClient to communicate with that. The coordinating node should join your cluster.
 
 See [Connecting a Client to a Coordinating Only Node](https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/client-connected-to-client-node.html)
