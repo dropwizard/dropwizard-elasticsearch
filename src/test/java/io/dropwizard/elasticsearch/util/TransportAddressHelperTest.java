@@ -68,7 +68,7 @@ public class TransportAddressHelperTest {
 
         for (int i = 0; i < result.length; i++) {
             final InetSocketTransportAddress transportAddress = (InetSocketTransportAddress) result[i];
-            assertEquals(hostAndPorts.get(i).getHostText(), transportAddress.address().getHostName());
+            assertEquals(hostAndPorts.get(i).getHost(), transportAddress.address().getHostName());
             assertEquals(hostAndPorts.get(i).getPortOrDefault(ES_DEFAULT_PORT), transportAddress.address().getPort());
         }
     }
