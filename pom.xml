@@ -9,7 +9,7 @@
 
     <groupId>io.dropwizard.modules</groupId>
     <artifactId>dropwizard-elasticsearch</artifactId>
-    <version>1.2.0-2-ES5.2.2-SNAPSHOT</version>
+    <version>1.2.0-2-ES5.6.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Dropwizard Elasticsearch Bundle</name>
@@ -63,6 +63,11 @@
             <name>Jochen Schalanda</name>
             <email>jochen@schalanda.name</email>
         </developer>
+        <developer>
+            <id>mattflax</id>
+            <name>Matt Pearce</name>
+            <email>matt@flax.co.uk</email>
+        </developer>
     </developers>
 
     <properties>
@@ -72,7 +77,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <log4j.version>2.8.1</log4j.version>
         <dropwizard.version>1.2.0</dropwizard.version>
-        <elasticsearch.version>5.2.2</elasticsearch.version>
+        <elasticsearch.version>5.6.4</elasticsearch.version>
         <!-- github server corresponds to entry in ~/.m2/settings.xml -->
         <github.global.server>github</github.global.server>
     </properties>

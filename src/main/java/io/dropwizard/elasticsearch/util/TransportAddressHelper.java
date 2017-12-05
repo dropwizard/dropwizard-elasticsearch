@@ -21,7 +21,7 @@ public class TransportAddressHelper {
      * @return a {@link TransportAddress} equivalent to the provided {@link HostAndPort} instance
      */
     public static TransportAddress fromHostAndPort(final HostAndPort hostAndPort) {
-        InetSocketAddress address = new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPortOrDefault(DEFAULT_PORT));
+        InetSocketAddress address = new InetSocketAddress(hostAndPort.getHost(), hostAndPort.getPortOrDefault(DEFAULT_PORT));
         return new InetSocketTransportAddress(address);
     }
 
