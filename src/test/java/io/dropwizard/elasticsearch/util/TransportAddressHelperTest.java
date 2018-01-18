@@ -2,7 +2,6 @@ package io.dropwizard.elasticsearch.util;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HostAndPort;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.junit.Test;
 
@@ -39,8 +38,7 @@ public class TransportAddressHelperTest {
 
     @Test
     public void fromHostAndPortWithoutPortShouldUseDefaultPort() {
-        InetSocketTransportAddress result = (InetSocketTransportAddress) TransportAddressHelper
-                .fromHostAndPort(HostAndPort.fromString("localhost"));
+        TransportAddress result = TransportAddressHelper.fromHostAndPort(HostAndPort.fromString("localhost"));
 
         assertEquals("localhost", result.address().getHostName());
         assertEquals(ES_DEFAULT_PORT, result.address().getPort());
@@ -48,8 +46,7 @@ public class TransportAddressHelperTest {
 
     @Test
     public void fromHostAndPortWithCorrectDataShouldSucceed() {
-        InetSocketTransportAddress result = (InetSocketTransportAddress) TransportAddressHelper
-                .fromHostAndPort(HostAndPort.fromParts("localhost", 1234));
+        TransportAddress result = TransportAddressHelper.fromHostAndPort(HostAndPort.fromParts("localhost", 1234));
 
         assertEquals("localhost", result.address().getHostName());
         assertEquals(1234, result.address().getPort());
@@ -67,7 +64,7 @@ public class TransportAddressHelperTest {
         assertEquals(3, result.length);
 
         for (int i = 0; i < result.length; i++) {
-            final InetSocketTransportAddress transportAddress = (InetSocketTransportAddress) result[i];
+            final TransportAddress transportAddress = result[i];
             assertEquals(hostAndPorts.get(i).getHost(), transportAddress.address().getHostName());
             assertEquals(hostAndPorts.get(i).getPortOrDefault(ES_DEFAULT_PORT), transportAddress.address().getPort());
         }

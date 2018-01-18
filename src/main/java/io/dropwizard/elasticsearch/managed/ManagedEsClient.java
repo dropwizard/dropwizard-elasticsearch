@@ -49,7 +49,7 @@ public class ManagedEsClient implements Managed {
      * @throws UnsupportedOperationException if {@code nodeClient=true} has been configured. This version
      * of Elasticsearch does not provide a NodeClient.
      */
-    public ManagedEsClient(final EsConfiguration config) throws IOException {
+    public ManagedEsClient(final EsConfiguration config)  {
         checkNotNull(config, "EsConfiguration must not be null");
 
         final Settings.Builder settingsBuilder = Settings.builder();
@@ -63,7 +63,11 @@ public class ManagedEsClient implements Managed {
                     throw new IllegalArgumentException("settings file cannot be found", e);
                 }
             }
-            settingsBuilder.loadFromPath(path);
+            try {
+                settingsBuilder.loadFromPath(path);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("settings file cannot be found", e);
+            }
         }
 
         final Settings settings = settingsBuilder
@@ -75,7 +79,7 @@ public class ManagedEsClient implements Managed {
                 .build();
 
         if (config.isNodeClient()) {
-            throw new UnsupportedOperationException("Node client is not allowed for Elasticsearch 5. Use a local coordinating node, and the transport client.");
+            throw new UnsupportedOperationException("Node client is not allowed for Elasticsearch 6. Use a local coordinating node, and the transport client.");
         } else {
             final TransportAddress[] addresses = TransportAddressHelper.fromHostAndPorts(config.getServers());
             this.client = new PreBuiltTransportClient(settings).addTransportAddresses(addresses);
