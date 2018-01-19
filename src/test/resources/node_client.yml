@@ -1,3 +1,5 @@
 clusterName: dropwizard_elasticsearch_test
+nodeClient: true
 settings:
   path.home: "target/data"
+  transport.type: local

@@ -9,8 +9,11 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.node.Node;
+import org.elasticsearch.node.NodeValidationException;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -18,14 +21,19 @@ import java.nio.file.Paths;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 /**
- * A Dropwizard managed Elasticsearch {@link Client}. Depending on the {@link EsConfiguration} a Node Client or
- * a {@link TransportClient} a is being created and its lifecycle is managed by Dropwizard.
+ * A Dropwizard managed Elasticsearch {@link Client} for Elasticsearch 5.
  *
- * @see <a href="http://www.elasticsearch.org/guide/reference/java-api/client/#nodeclient">Node Client</a>
- * @see <a href="http://www.elasticsearch.org/guide/reference/java-api/client/#transportclient">Transport Client</a>
+ * Elasticsearch 5 no longer allows using a Node Client to connect to the service. The advice
+ * is to run a local coordinating node (with whichever plugins you require), and to use the
+ * {@link TransportClient} to connect to your cluster via that node.
+ *
+ * If the {@code nodeClient} configuration option is selected, the client will fail and
+ * throw an {@link UnsupportedOperationException}.
+ *
+ * @see <a href="https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/client-connected-to-client-node.html">Connecting a Client to a Coordinating Only Node</a>
+ * @see <a href="https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/transport-client.html">Transport Client</a>
  */
 public class ManagedEsClient implements Managed {
     private Node node = null;
@@ -37,8 +45,11 @@ public class ManagedEsClient implements Managed {
      * as transport addresses.
      *
      * @param config a valid {@link EsConfiguration} instance
+     * @throws IOException if a settings file has been specified and cannot be read.
+     * @throws UnsupportedOperationException if {@code nodeClient=true} has been configured. This version
+     * of Elasticsearch does not provide a NodeClient.
      */
-    public ManagedEsClient(final EsConfiguration config) {
+    public ManagedEsClient(final EsConfiguration config)  {
         checkNotNull(config, "EsConfiguration must not be null");
 
         final Settings.Builder settingsBuilder = Settings.builder();
@@ -52,24 +63,26 @@ public class ManagedEsClient implements Managed {
                     throw new IllegalArgumentException("settings file cannot be found", e);
                 }
             }
-            settingsBuilder.loadFromPath(path);
+            try {
+                settingsBuilder.loadFromPath(path);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("settings file cannot be found", e);
+            }
         }
 
         final Settings settings = settingsBuilder
                 .put(config.getSettings())
                 .put("cluster.name", config.getClusterName())
+                .put(Node.NODE_DATA_SETTING.getKey(), false)
+                .put(Node.NODE_MASTER_SETTING.getKey(), false)
+                .put(Node.NODE_INGEST_SETTING.getKey(), false)
                 .build();
 
         if (config.isNodeClient()) {
-            this.node = nodeBuilder()
-                    .client(true)
-                    .data(false)
-                    .settings(settings)
-                    .build();
-            this.client = this.node.client();
+            throw new UnsupportedOperationException("Node client is not allowed for Elasticsearch 6. Use a local coordinating node, and the transport client.");
         } else {
             final TransportAddress[] addresses = TransportAddressHelper.fromHostAndPorts(config.getServers());
-            this.client = TransportClient.builder().settings(settings).build().addTransportAddresses(addresses);
+            this.client = new PreBuiltTransportClient(settings).addTransportAddresses(addresses);
         }
     }
 
@@ -124,7 +137,7 @@ public class ManagedEsClient implements Managed {
         return client;
     }
 
-    private Node startNode() {
+    private Node startNode() throws NodeValidationException {
         if (null != node) {
             return node.start();
         }
@@ -132,7 +145,7 @@ public class ManagedEsClient implements Managed {
         return null;
     }
 
-    private void closeNode() {
+    private void closeNode() throws IOException {
         if (null != node && !node.isClosed()) {
             node.close();
         }
@@ -143,4 +156,5 @@ public class ManagedEsClient implements Managed {
             client.close();
         }
     }
+
 }

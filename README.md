@@ -5,12 +5,12 @@ Dropwizard Elasticsearch
 [![Coverage Status](https://img.shields.io/coveralls/dropwizard/dropwizard-elasticsearch.svg)](https://coveralls.io/r/dropwizard/dropwizard-elasticsearch)
 [![Maven Central](https://img.shields.io/maven-central/v/io.dropwizard.modules/dropwizard-elasticsearch.svg)](http://mvnrepository.com/artifact/io.dropwizard.modules/dropwizard-elasticsearch)
 
-A set of classes for using [Elasticsearch][1] (version 2.3.0 and higher) in a [Dropwizard][2] application.
+A set of classes for using [Elasticsearch] [1] (version 2.3.0 and higher) in a [Dropwizard] [2] application.
 
-The package provides a [lifecycle-managed][3] client class (`ManagedEsClient`), a configuration class with the most
-common options (`EsConfiguration`), and some [health checks][4] which can instantly be used in any Dropwizard application.
+The package provides a [lifecycle-managed] [3] client class (`ManagedEsClient`), a configuration class with the most
+common options (`EsConfiguration`), and some [health checks] [4] which can instantly be used in any Dropwizard application.
 
-[1]: http://www.elasticsearch.org/
+[1]: http://www.elastic.co/
 [2]: http://dropwizard.io/1.2.0/docs
 [3]: http://dropwizard.io/1.2.0/docs/manual/core.html#managed-objects
 [4]: http://dropwizard.io/1.2.0/docs/manual/core.html#health-checks
@@ -43,7 +43,7 @@ Configuration
 
 The following configuration settings are supported by `EsConfiguration`:
 
-* `nodeClient`: When `true`, `ManagedEsClient` will create a `NodeClient`, otherwise a `TransportClient`; default: `true`
+* `nodeClient`: **DEPRECATED** Will throw an exception if `true`. Default: `false`
 * `servers`: A list of servers for usage with the created TransportClient if `nodeClient` is `false`
 * `clusterName`: The name of the Elasticsearch cluster; default: "elasticsearch"
 * `settings`: Any additional settings for Elasticsearch, see [Configuration](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/setup-configuration.html)
@@ -58,6 +58,17 @@ An example configuration file for creating a Node Client could like this:
 The order of precedence is: `nodeClient`/`servers`/`clusterName` > `settings` > `settingsFile`, meaning that
 any setting in `settingsFile` can be overwritten with `settings` which in turn get overwritten by the specific settings
 like `clusterName`.
+
+### Notes for Elasticsearch 5.x
+
+Elasticsearch 5 does not allow the creation of a NodeClient, and it is disabled in this version of
+the connector.
+
+The suggested alternative is to launch a local coordinating node, with whichever plugins you require,
+and use the TransportClient to communicate with that. The coordinating node should join your cluster.
+
+See [Connecting a Client to a Coordinating Only Node](https://www.elastic.co/guide/en/elasticsearch/client/java-api/current/client-connected-to-client-node.html)
+
 
 Maven Artifacts
 ---------------
