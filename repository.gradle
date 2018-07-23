@@ -1,0 +1,25 @@
+apply plugin: 'maven'
+
+// In order to upload to the repo, you need a file ~/.gradle/gradle.properties with
+// repoUser=<your user name>
+// repoPassword=<your password>
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            snapshotRepository(url: "https://repo.i.gini.net/nexus/content/repositories/snapshots") {
+                authentication(
+                        userName: project.hasProperty('repoUser') ? repoUser : "invalidUserName",
+                        password: project.hasProperty('repoPassword') ? repoPassword : "invalidPassword"
+                )
+                uniqueVersion = false
+            }
+
+            repository(url: "https://repo.i.gini.net/nexus/content/repositories/gini-internal-libs/") {
+                authentication(
+                        userName: project.hasProperty('repoUser') ? repoUser : 'invalidUserName',
+                        password: project.hasProperty('repoPassword') ? repoPassword : 'invalidPassword'
+                )
+            }
+        }
+    }
+}
