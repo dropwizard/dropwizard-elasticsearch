@@ -22,15 +22,6 @@ pipeline {
                 sh "./gradlew -g=/efs/${PROJECT_NAME} -I /efs/init.gradle -Pbranch=${env.GIT_BRANCH} -PbuildNumber=${env.BUILD_NUMBER} clean build uploadArchives"
             }
             post {
-                always {
-                    junit '**/test-results/**/*.xml'
-                    publishHTML(target: [reportDir  : 'build/reports/allTests/',
-                                         reportFiles: 'index.html',
-                                         reportName : 'Test results'])
-                    publishHTML(target: [reportDir  : 'build/reports/jacoco/jacocoSumTestReport/html/',
-                                         reportFiles: 'index.html',
-                                         reportName : 'Jacoco Code Coverage'])
-                }
                 failure {
                     updateGitlabCommitStatus name: 'Build and test', state: 'failed'
                 }
