@@ -1,4 +1,3 @@
-nodeClient: false
 clusterName: dropwizard_elasticsearch_test
 servers:
   - 127.0.0.1

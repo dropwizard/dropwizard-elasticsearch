@@ -44,11 +44,6 @@ public class ManagedEsClientTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void ensureNodeIsNotNull() {
-        new ManagedEsClient((Node) null);
-    }
-
-    @Test(expected = NullPointerException.class)
     public void ensureClientIsNotNull() {
         new ManagedEsClient((Client) null);
     }
@@ -62,48 +57,6 @@ public class ManagedEsClientTest {
         managed.stop();
 
         verify(client).close();
-    }
-
-    @Test
-    public void lifecycleMethodsShouldStartAndCloseTheNode() throws Exception {
-        Node node = mock(Node.class);
-        when(node.isClosed()).thenReturn(false);
-        Managed managed = new ManagedEsClient(node);
-
-        managed.start();
-        verify(node).start();
-
-        managed.stop();
-        verify(node).close();
-    }
-
-    @Test
-    public void managedEsClientWithNodeShouldReturnClient() throws Exception {
-        Client client = mock(Client.class);
-        Node node = mock(Node.class);
-        when(node.client()).thenReturn(client);
-
-        ManagedEsClient managed = new ManagedEsClient(node);
-
-        assertSame(client, managed.getClient());
-    }
-
-    @Test
-    public void nodeClientShouldBeCreatedFromConfig() throws URISyntaxException, IOException, ConfigurationException {
-        URL configFileUrl = this.getClass().getResource("/node_client.yml");
-        File configFile = new File(configFileUrl.toURI());
-        EsConfiguration config = configFactory.build(configFile);
-
-        ManagedEsClient managedEsClient = new ManagedEsClient(config);
-        Client client = managedEsClient.getClient();
-
-        assertNotNull(client);
-        assertTrue(client instanceof NodeClient);
-
-        NodeClient nodeClient = (NodeClient) client;
-        assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
-        assertEquals("true", nodeClient.settings().get("node.client"));
-        assertEquals("false", nodeClient.settings().get("node.data"));
     }
 
     @Test
@@ -141,9 +94,9 @@ public class ManagedEsClientTest {
         Client client = managedEsClient.getClient();
 
         assertNotNull(client);
-        assertTrue(client instanceof NodeClient);
+        assertTrue(client instanceof TransportClient);
 
-        NodeClient nodeClient = (NodeClient) client;
+        TransportClient nodeClient = (TransportClient) client;
         assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
         assertEquals("19300-19400", nodeClient.settings().get("transport.tcp.port"));
     }
@@ -158,9 +111,9 @@ public class ManagedEsClientTest {
         Client client = managedEsClient.getClient();
 
         assertNotNull(client);
-        assertTrue(client instanceof NodeClient);
+        assertTrue(client instanceof TransportClient);
 
-        NodeClient nodeClient = (NodeClient) client;
+        TransportClient nodeClient = (TransportClient) client;
         assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
         assertEquals("29300-29400", nodeClient.settings().get("transport.tcp.port"));
         assertEquals("target/data/yaml", nodeClient.settings().get("path.home"));

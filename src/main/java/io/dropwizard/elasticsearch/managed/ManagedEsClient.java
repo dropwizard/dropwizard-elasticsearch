@@ -9,8 +9,10 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.node.Node;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -18,7 +20,7 @@ import java.nio.file.Paths;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
+
 
 /**
  * A Dropwizard managed Elasticsearch {@link Client}. Depending on the {@link EsConfiguration} a Node Client or
@@ -32,8 +34,7 @@ public class ManagedEsClient implements Managed {
     private Client client = null;
 
     /**
-     * Create a new managed Elasticsearch {@link Client}. If {@link EsConfiguration#nodeClient} is {@literal true}, a
-     * Node Client is being created, otherwise a {@link TransportClient} is being created with {@link EsConfiguration#servers}
+     * Create a new managed Elasticsearch {@link Client}. A {@link TransportClient} is being created with {@link EsConfiguration#servers}
      * as transport addresses.
      *
      * @param config a valid {@link EsConfiguration} instance
@@ -48,11 +49,13 @@ public class ManagedEsClient implements Managed {
                 try {
                     final URL url = Resources.getResource(config.getSettingsFile());
                     path = new File(url.toURI()).toPath();
+                    settingsBuilder.loadFromPath(path);
                 } catch (URISyntaxException | NullPointerException e) {
                     throw new IllegalArgumentException("settings file cannot be found", e);
+                } catch (IOException e){
+                    throw new IllegalStateException("settings file cannot be loaded", e);
                 }
             }
-            settingsBuilder.loadFromPath(path);
         }
 
         final Settings settings = settingsBuilder
@@ -60,29 +63,11 @@ public class ManagedEsClient implements Managed {
                 .put("cluster.name", config.getClusterName())
                 .build();
 
-        if (config.isNodeClient()) {
-            this.node = nodeBuilder()
-                    .client(true)
-                    .data(false)
-                    .settings(settings)
-                    .build();
-            this.client = this.node.client();
-        } else {
-            final TransportAddress[] addresses = TransportAddressHelper.fromHostAndPorts(config.getServers());
-            this.client = TransportClient.builder().settings(settings).build().addTransportAddresses(addresses);
-        }
-    }
 
-    /**
-     * Create a new managed Elasticsearch {@link Client} from the provided {@link Node}.
-     *
-     * @param node a valid {@link Node} instance
-     */
-    public ManagedEsClient(final Node node) {
-        this.node = checkNotNull(node, "Elasticsearch node must not be null");
-        this.client = node.client();
-    }
+        final TransportAddress[] addresses = TransportAddressHelper.fromHostAndPorts(config.getServers());
+        this.client = new PreBuiltTransportClient(settings).addTransportAddresses(addresses);
 
+    }
 
     /**
      * Create a new managed Elasticsearch {@link Client} from the provided {@link Client}.
@@ -100,7 +85,6 @@ public class ManagedEsClient implements Managed {
      */
     @Override
     public void start() throws Exception {
-        startNode();
     }
 
     /**
@@ -112,7 +96,6 @@ public class ManagedEsClient implements Managed {
     @Override
     public void stop() throws Exception {
         closeClient();
-        closeNode();
     }
 
     /**
@@ -124,19 +107,6 @@ public class ManagedEsClient implements Managed {
         return client;
     }
 
-    private Node startNode() {
-        if (null != node) {
-            return node.start();
-        }
-
-        return null;
-    }
-
-    private void closeNode() {
-        if (null != node && !node.isClosed()) {
-            node.close();
-        }
-    }
 
     private void closeClient() {
         if (null != client) {
