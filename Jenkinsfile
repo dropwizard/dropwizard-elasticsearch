@@ -19,7 +19,7 @@ pipeline {
         stage('Build and test') {
             steps {
                 updateGitlabCommitStatus name: 'pipeline', state: 'running'
-                sh "./gradlew -g=/efs/${PROJECT_NAME} -I /efs/init.gradle -Pbranch=${env.GIT_BRANCH} -PbuildNumber=${env.BUILD_NUMBER} clean build testReport jacocoTestReport jacocoSumTestReport"
+                sh "./gradlew -g=/efs/${PROJECT_NAME} -I /efs/init.gradle -Pbranch=${env.GIT_BRANCH} -PbuildNumber=${env.BUILD_NUMBER} clean build uploadArchives"
             }
             post {
                 always {
