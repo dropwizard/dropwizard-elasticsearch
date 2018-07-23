@@ -9,6 +9,8 @@ release.properties
 *.iws
 .idea/
 out/
+build/
+**/buildOutputCleanup/
 
 # Eclipse
 .settings/
