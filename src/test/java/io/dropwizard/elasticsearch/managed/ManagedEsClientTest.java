@@ -51,7 +51,7 @@ public class ManagedEsClientTest {
         RestHighLevelClient client =
                 mock(RestHighLevelClient.class);
         Managed managed = new ManagedEsClient(client);
-        // to stub the final result it is required to have the
+        // to stub a final method it is necessary to have the
         //  /src/test/resources/mockito-extensions/org.mockiot.plugins.MockMaker     file
         // with `mock-maker-inline` as context
         doNothing().when(client).close();
