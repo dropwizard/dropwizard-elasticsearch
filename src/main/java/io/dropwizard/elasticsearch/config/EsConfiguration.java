@@ -18,6 +18,31 @@ public class EsConfiguration {
     @NotNull
     private List<String> servers = Collections.emptyList();
 
+    @JsonProperty
+    @NotNull
+    private int connectTimeOut = 1000;
+
+    @JsonProperty
+    @NotNull
+    private int socketTimeOut = 30000;
+
+    @JsonProperty
+    private int numberOfThreads = 0;
+
+    @JsonProperty
+    private String node = "";
+
+    @JsonProperty
+    private CredentialConfiguration credential = null;
+
+    @JsonProperty
+    private KeyStoreConfiguration keystore = null;
+
+
+
+    @JsonProperty
+    private SnifferConfiguration sniffer = null;
+
     public List<String> getServers() {
         return servers;
     }
@@ -34,4 +59,31 @@ public class EsConfiguration {
         return httpHosts;
     }
 
+    public int getConnectTimeOut() {
+        return connectTimeOut;
+    }
+
+    public int getSocketTimeOut() {
+        return socketTimeOut;
+    }
+
+    public int getNumberOfThreads() {
+        return numberOfThreads;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public CredentialConfiguration getCredential() {
+        return credential;
+    }
+
+    public KeyStoreConfiguration getKeystore() {
+        return keystore;
+    }
+
+    public SnifferConfiguration getSniffer() {
+        return sniffer;
+    }
 }
