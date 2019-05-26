@@ -19,7 +19,11 @@ pipeline {
         stage('Build and test') {
             steps {
                 updateGitlabCommitStatus name: 'pipeline', state: 'running'
-                sh "./gradlew -g=/efs/${PROJECT_NAME} -I /efs/init.gradle -Pbranch=${env.GIT_BRANCH} -PbuildNumber=${env.BUILD_NUMBER} clean build uploadArchives"
+                sh """./gradlew -g=/efs/${PROJECT_NAME} \
+                        -I /home/jenkins/gradle/init.gradle \
+                        -Pbranch=${env.GIT_BRANCH} \
+                        -PbuildNumber=${env.BUILD_NUMBER} \
+                        clean build"""
             }
             post {
                 failure {
@@ -28,6 +32,16 @@ pipeline {
                 success {
                     updateGitlabCommitStatus name: 'Build and test', state: 'success'
                 }
+            }
+        }
+        stage('upload archives') {
+            steps {
+                sh """./gradlew -g=/efs/${PROJECT_NAME} \
+                    -I /home/jenkins/gradle/init.gradle \
+                    -Pbranch=${env.GIT_BRANCH} \
+                    -PbuildNumber=${env.BUILD_NUMBER} \
+                    uploadArchives"""
+
             }
         }
     }
