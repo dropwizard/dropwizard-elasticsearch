@@ -20,10 +20,11 @@ repositories {
 }
 
 dependencies {
-    compile group: 'io.dropwizard', name: 'dropwizard-core', version:'1.2.5'
-    compile group: 'org.elasticsearch.client', name: 'transport', version:'5.6.10'
+    compile group: 'io.dropwizard', name: 'dropwizard-core', version:'1.3.11'
+    compile group: 'org.elasticsearch.client', name: 'transport', version:'7.1.0'
+    compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.1.0'
     testCompile group: 'junit', name: 'junit', version:'4.12'
-    testCompile group: 'org.mockito', name: 'mockito-core', version:'2.19.0'
+    testCompile group: 'org.mockito', name: 'mockito-core', version:'2.27.0'
 }
 
 task testReport(type: TestReport) {
@@ -41,6 +42,6 @@ task jacocoSumTestReport(type: JacocoReport) {
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.9'
+wrapper {
+    gradleVersion = '5.4.1'
 }

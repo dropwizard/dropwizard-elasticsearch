@@ -1,13 +1,14 @@
 package io.dropwizard.elasticsearch.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.net.HostAndPort;
-import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.constraints.NotNull;
+import org.apache.http.HttpHost;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * Configuration class for Elasticsearch related settings.
@@ -15,32 +16,18 @@ import java.util.Map;
 public class EsConfiguration {
     @JsonProperty
     @NotNull
-    private List<HostAndPort> servers = Collections.emptyList();
+    private List<String> servers = Collections.emptyList();
 
-    @JsonProperty
-    @NotEmpty
-    private String clusterName = "elasticsearch";
-
-    @JsonProperty
-    @NotNull
-    private Map<String, String> settings = Collections.emptyMap();
-
-    @JsonProperty
-    private String settingsFile = null;
-
-    public List<HostAndPort> getServers() {
+    public List<String> getServers() {
         return servers;
     }
 
-    public String getClusterName() {
-        return clusterName;
+    public List<HttpHost> getHttpHosts() {
+        ArrayList<HttpHost> httpHosts=new ArrayList<>();
+        getServers().forEach(hostAndPort -> {
+            httpHosts.add(HttpHost.create(hostAndPort));
+        });
+        return httpHosts;
     }
 
-    public Map<String, String> getSettings() {
-        return settings;
-    }
-
-    public String getSettingsFile() {
-        return settingsFile;
-    }
 }

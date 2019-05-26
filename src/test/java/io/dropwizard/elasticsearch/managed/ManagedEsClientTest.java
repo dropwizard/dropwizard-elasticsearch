@@ -1,30 +1,31 @@
 package io.dropwizard.elasticsearch.managed;
 
-import com.google.common.net.HostAndPort;
-import io.dropwizard.configuration.ConfigurationException;
-import io.dropwizard.configuration.ConfigurationFactory;
-import io.dropwizard.configuration.DefaultConfigurationFactoryFactory;
-import io.dropwizard.elasticsearch.config.EsConfiguration;
-import io.dropwizard.elasticsearch.util.TransportAddressHelper;
-import io.dropwizard.jackson.Jackson;
-import io.dropwizard.lifecycle.Managed;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.node.NodeClient;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.node.Node;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import javax.validation.Validation;
+import javax.validation.Validator;
+
+import io.dropwizard.configuration.ConfigurationException;
+import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.configuration.DefaultConfigurationFactoryFactory;
+import io.dropwizard.elasticsearch.config.EsConfiguration;
+import io.dropwizard.jackson.Jackson;
+import io.dropwizard.lifecycle.Managed;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.when;
 /**
  * Unit tests for {@link ManagedEsClient}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ManagedEsClientTest {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     private final ConfigurationFactory<EsConfiguration> configFactory =
@@ -45,77 +47,57 @@ public class ManagedEsClientTest {
 
     @Test(expected = NullPointerException.class)
     public void ensureClientIsNotNull() {
-        new ManagedEsClient((Client) null);
+        new ManagedEsClient((RestHighLevelClient) null);
     }
 
     @Test
     public void stopShouldCloseTheClient() throws Exception {
-        Client client = mock(Client.class);
+        RestHighLevelClient client =
+                mock(RestHighLevelClient.class);
         Managed managed = new ManagedEsClient(client);
-
+        // to stub the final result it is required to have the
+        //  /src/test/resources/mockito-extensions/org.mockiot.plugins.MockMaker     file
+        // with `mock-maker-inline` as context
+        doNothing().when(client).close();
+        assertNotNull(client);
         managed.start();
         managed.stop();
-
         verify(client).close();
+        assertNotNull(client);
     }
 
     @Test
-    public void transportClientShouldBeCreatedFromConfig() throws URISyntaxException, IOException, ConfigurationException {
-        URL configFileUrl = this.getClass().getResource("/transport_client.yml");
+    public void highLevelRestClientShouldBeCreatedFromConfig() throws URISyntaxException, IOException, ConfigurationException {
+        URL configFileUrl = this.getClass().getResource("/rest_client.yml");
         File configFile = new File(configFileUrl.toURI());
         EsConfiguration config = configFactory.build(configFile);
 
         ManagedEsClient managedEsClient = new ManagedEsClient(config);
-        Client client = managedEsClient.getClient();
+        RestHighLevelClient restHighLevelClient = managedEsClient.getClient();
 
-        assertNotNull(client);
-        assertTrue(client instanceof TransportClient);
+        assertNotNull(restHighLevelClient);
 
-        final TransportClient transportClient = (TransportClient) client;
-        assertEquals(3, transportClient.transportAddresses().size());
+        assertEquals(3, restHighLevelClient.getLowLevelClient().getNodes().size());
         assertEquals(
-                TransportAddressHelper.fromHostAndPort(HostAndPort.fromParts("127.0.0.1", 9300)),
-                transportClient.transportAddresses().get(0));
+                "127.0.0.1",
+                restHighLevelClient.getLowLevelClient().getNodes().get(0).getHost().getHostName());
+
         assertEquals(
-                TransportAddressHelper.fromHostAndPort(HostAndPort.fromParts("127.0.0.1", 9301)),
-                transportClient.transportAddresses().get(1));
+                9200,
+                restHighLevelClient.getLowLevelClient().getNodes().get(0).getHost().getPort());
         assertEquals(
-                TransportAddressHelper.fromHostAndPort(HostAndPort.fromParts("127.0.0.1", 9302)),
-                transportClient.transportAddresses().get(2));
-    }
+                "127.0.0.1",
+                restHighLevelClient.getLowLevelClient().getNodes().get(1).getHost().getHostName());
 
-    @Test
-    public void managedClientShouldUseCustomElasticsearchConfig() throws URISyntaxException, IOException, ConfigurationException {
-        URL configFileUrl = this.getClass().getResource("/custom_settings_file.yml");
-        File configFile = new File(configFileUrl.toURI());
-        EsConfiguration config = configFactory.build(configFile);
+        assertEquals(
+                9201,
+                restHighLevelClient.getLowLevelClient().getNodes().get(1).getHost().getPort());
+        assertEquals(
+                "127.0.0.1",
+                restHighLevelClient.getLowLevelClient().getNodes().get(2).getHost().getHostName());
 
-        ManagedEsClient managedEsClient = new ManagedEsClient(config);
-        Client client = managedEsClient.getClient();
-
-        assertNotNull(client);
-        assertTrue(client instanceof TransportClient);
-
-        TransportClient nodeClient = (TransportClient) client;
-        assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
-        assertEquals("19300-19400", nodeClient.settings().get("transport.tcp.port"));
-    }
-
-    @Test
-    public void managedClientObeysPrecedenceOfSettings() throws URISyntaxException, IOException, ConfigurationException {
-        URL configFileUrl = this.getClass().getResource("/custom_settings_precedence.yml");
-        File configFile = new File(configFileUrl.toURI());
-        EsConfiguration config = configFactory.build(configFile);
-
-        ManagedEsClient managedEsClient = new ManagedEsClient(config);
-        Client client = managedEsClient.getClient();
-
-        assertNotNull(client);
-        assertTrue(client instanceof TransportClient);
-
-        TransportClient nodeClient = (TransportClient) client;
-        assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
-        assertEquals("29300-29400", nodeClient.settings().get("transport.tcp.port"));
-        assertEquals("target/data/yaml", nodeClient.settings().get("path.home"));
+        assertEquals(
+                9202,
+                restHighLevelClient.getLowLevelClient().getNodes().get(2).getHost().getPort());
     }
 }
