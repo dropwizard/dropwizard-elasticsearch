@@ -22,10 +22,14 @@ public class EsConfiguration {
         return servers;
     }
 
-    public List<HttpHost> getHttpHosts() {
+    public List<HttpHost> getServersAsHttpHosts() {
         ArrayList<HttpHost> httpHosts=new ArrayList<>();
         getServers().forEach(hostAndPort -> {
-            httpHosts.add(HttpHost.create(hostAndPort));
+            HttpHost httpHost = HttpHost.create(hostAndPort);
+            if (httpHost.getPort() < 0) {
+                httpHost = new HttpHost(httpHost.getHostName(), 9200);
+            }
+            httpHosts.add(httpHost);
         });
         return httpHosts;
     }

@@ -3,18 +3,13 @@ package io.dropwizard.elasticsearch.managed;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
-
-import java.util.stream.Collectors;
 
 import io.dropwizard.elasticsearch.config.EsConfiguration;
 import io.dropwizard.lifecycle.Managed;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.apache.commons.lang3.ArrayUtils.toArray;
 
 
 /**
@@ -29,7 +24,7 @@ public class ManagedEsClient implements Managed {
         checkNotNull(config, "EsConfiguration must not be null");
         this.client =
                 new RestHighLevelClient(
-                        RestClient.builder(config.getHttpHosts().toArray(new HttpHost[0]))
+                        RestClient.builder(config.getServersAsHttpHosts().toArray(new HttpHost[0]))
                 );
     }
 
