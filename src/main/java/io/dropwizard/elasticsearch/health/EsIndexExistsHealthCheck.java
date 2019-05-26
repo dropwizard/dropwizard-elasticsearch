@@ -1,9 +1,12 @@
 package io.dropwizard.elasticsearch.health;
 
-import com.codahale.metrics.health.HealthCheck;
 import com.google.common.collect.ImmutableList;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
-import org.elasticsearch.client.Client;
+
+import com.codahale.metrics.health.HealthCheck;
+
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.GetIndexRequest;
 
 import java.util.List;
 
@@ -16,17 +19,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see <a href="http://www.elasticsearch.org/guide/reference/api/admin-indices-indices-exists/">Admin Indices Indices Exists</a>
  */
 public class EsIndexExistsHealthCheck extends HealthCheck {
-    private final Client client;
+    private final RestHighLevelClient client;
     private final String[] indices;
 
     /**
      * Construct a new Elasticsearch index exists health check.
      *
-     * @param client  an Elasticsearch {@link Client} instance connected to the cluster
+     * @param client  an Elasticsearch {@link RestHighLevelClient} instance connected to the cluster
      * @param indices a {@link List} of indices in Elasticsearch which should be checked
      * @throws IllegalArgumentException if {@code indices} was {@literal null} or empty
      */
-    public EsIndexExistsHealthCheck(Client client, List<String> indices) {
+    public EsIndexExistsHealthCheck(RestHighLevelClient client, List<String> indices) {
         checkArgument(!indices.isEmpty(), "At least one index must be given");
 
         this.client = checkNotNull(client);
@@ -39,7 +42,7 @@ public class EsIndexExistsHealthCheck extends HealthCheck {
      * @param client    an Elasticsearch {@link org.elasticsearch.client.Client} instance connected to the cluster
      * @param indexName the index in Elasticsearch which should be checked
      */
-    public EsIndexExistsHealthCheck(Client client, String indexName) {
+    public EsIndexExistsHealthCheck(RestHighLevelClient client, String indexName) {
         this(client, ImmutableList.of(indexName));
     }
 
@@ -54,9 +57,9 @@ public class EsIndexExistsHealthCheck extends HealthCheck {
      */
     @Override
     protected Result check() throws Exception {
-        final IndicesExistsResponse indicesExistsResponse = client.admin().indices().prepareExists(indices).get();
-
-        if (indicesExistsResponse.isExists()) {
+        GetIndexRequest request = new GetIndexRequest(indices);
+        boolean exists = client.indices().exists(request, RequestOptions.DEFAULT);
+        if (exists) {
             return Result.healthy();
         } else {
             return Result.unhealthy("One or more indices do not exist.");

@@ -1,7 +1,8 @@
 package io.dropwizard.elasticsearch.health;
 
 import com.google.common.collect.ImmutableList;
-import org.elasticsearch.client.Client;
+
+import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -19,21 +20,21 @@ public class EsIndexExistsHealthCheckTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void initializationWithoutIndicesShouldFail() {
-        new EsIndexExistsHealthCheck(mock(Client.class), Collections.<String>emptyList());
+        new EsIndexExistsHealthCheck(mock(RestHighLevelClient.class), Collections.<String>emptyList());
     }
 
     @Test(expected = NullPointerException.class)
     public void initializationWithoutIndexShouldFail() {
-        new EsIndexExistsHealthCheck(mock(Client.class), (String) null);
+        new EsIndexExistsHealthCheck(mock(RestHighLevelClient.class), (String) null);
     }
 
     @Test
     public void initializationWithClientAndIndexShouldSucceed() {
-        new EsIndexExistsHealthCheck(mock(Client.class), "index");
+        new EsIndexExistsHealthCheck(mock(RestHighLevelClient.class), "index");
     }
 
     @Test
     public void initializationWithClientAndIndicesShouldSucceed() {
-        new EsIndexExistsHealthCheck(mock(Client.class), ImmutableList.of("index", "foobar"));
+        new EsIndexExistsHealthCheck(mock(RestHighLevelClient.class), ImmutableList.of("index", "foobar"));
     }
 }

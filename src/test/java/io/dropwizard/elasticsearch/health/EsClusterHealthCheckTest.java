@@ -1,6 +1,6 @@
 package io.dropwizard.elasticsearch.health;
 
-import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.Test;
 
 import static org.mockito.Mockito.mock;
@@ -16,6 +16,6 @@ public class EsClusterHealthCheckTest {
 
     @Test
     public void initializationWithClientShouldSucceed() {
-        new EsClusterHealthCheck(mock(Client.class));
+        new EsClusterHealthCheck(mock(RestHighLevelClient.class));
     }
 }
