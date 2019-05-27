@@ -1,16 +1,15 @@
 package io.dropwizard.elasticsearch.health;
 
-import com.codahale.metrics.health.HealthCheck;
 import com.google.common.collect.ImmutableList;
-import org.elasticsearch.action.admin.indices.stats.IndexStats;
-import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
+
+import com.codahale.metrics.health.HealthCheck;
+
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.util.ArrayList;

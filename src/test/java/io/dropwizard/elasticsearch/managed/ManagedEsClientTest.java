@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import org.elasticsearch.client.sniff.Sniffer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -37,7 +38,7 @@ public class ManagedEsClientTest {
                     .create(EsConfiguration.class, validator, Jackson.newObjectMapper(), "dw");
 
     @Test(expected = NullPointerException.class)
-    public void ensureEsConfigurationIsNotNull() {
+    public void ensureEsConfigurationIsNotNull() throws Exception {
         new ManagedEsClient((EsConfiguration) null);
     }
 
@@ -63,7 +64,25 @@ public class ManagedEsClientTest {
     }
 
     @Test
-    public void highLevelRestClientShouldBeCreatedFromConfig() throws URISyntaxException, IOException, ConfigurationException {
+    public void stopShouldCloseTheClientWithSniffer() throws Exception {
+        RestHighLevelClient client =
+                mock(RestHighLevelClient.class);
+        Sniffer sniffer = mock(Sniffer.class);
+        Managed managed = new ManagedEsClient(client, sniffer);
+        // to stub a final method it is necessary to have the
+        //  /src/test/resources/mockito-extensions/org.mockiot.plugins.MockMaker     file
+        // with `mock-maker-inline` as context
+        doNothing().when(client).close();
+        doNothing().when(sniffer).close();
+        assertNotNull(client);
+        managed.start();
+        managed.stop();
+        verify(client).close();
+        verify(sniffer).close();
+    }
+
+    @Test
+    public void highLevelRestClientShouldBeCreatedFromConfig() throws Exception {
         URL configFileUrl = this.getClass().getResource("/rest_client.yml");
         File configFile = new File(configFileUrl.toURI());
         EsConfiguration config = configFactory.build(configFile);
@@ -95,5 +114,39 @@ public class ManagedEsClientTest {
         assertEquals(
                 9202,
                 restHighLevelClient.getLowLevelClient().getNodes().get(2).getHost().getPort());
+    }
+
+    @Test
+    public void highLevelRestClientShouldBeCreatedFromConfigWithExtendedFields() throws Exception {
+        URL configFileUrl = this.getClass().getResource("/rest_client_with_sniffer_on_failure.yml");
+        File configFile = new File(configFileUrl.toURI());
+        EsConfiguration config = configFactory.build(configFile);
+
+        ManagedEsClient managedEsClient = new ManagedEsClient(config);
+        RestHighLevelClient restHighLevelClient = managedEsClient.getClient();
+
+        assertNotNull(restHighLevelClient);
+
+        assertEquals(1, restHighLevelClient.getLowLevelClient().getNodes().size());
+        assertEquals(
+                "127.0.0.1",
+                restHighLevelClient.getLowLevelClient().getNodes().get(0).getHost().getHostName());
+    }
+
+    @Test
+    public void highLevelRestClientShouldBeCreatedWithSniffer() throws Exception {
+        URL configFileUrl = this.getClass().getResource("/rest_client_sniffer.yml");
+        File configFile = new File(configFileUrl.toURI());
+        EsConfiguration config = configFactory.build(configFile);
+
+        ManagedEsClient managedEsClient = new ManagedEsClient(config);
+        RestHighLevelClient restHighLevelClient = managedEsClient.getClient();
+
+        assertNotNull(restHighLevelClient);
+
+        assertEquals(1, restHighLevelClient.getLowLevelClient().getNodes().size());
+        assertEquals(
+                "127.0.0.1",
+                restHighLevelClient.getLowLevelClient().getNodes().get(0).getHost().getHostName());
     }
 }

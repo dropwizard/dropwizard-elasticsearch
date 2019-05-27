@@ -2,12 +2,16 @@ package io.dropwizard.elasticsearch.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class CredentialConfiguration {
+import javax.validation.constraints.NotNull;
+
+public class BasicAuthenticationConfiguration {
     @JsonProperty
-    private String user = null;
+    @NotNull
+    private String user="";
 
     @JsonProperty
-    private String password = null;
+    @NotNull
+    private String password="";
 
     public String getUser() {
         return user;

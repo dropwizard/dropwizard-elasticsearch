@@ -3,10 +3,12 @@ package io.dropwizard.elasticsearch.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.apache.http.HttpHost;
+import org.apache.http.message.BasicHeader;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
@@ -33,15 +35,19 @@ public class EsConfiguration {
     private String node = "";
 
     @JsonProperty
-    private CredentialConfiguration credential = null;
+    private BasicAuthenticationConfiguration basicAuthentication = null;
 
     @JsonProperty
     private KeyStoreConfiguration keystore = null;
 
-
-
     @JsonProperty
     private SnifferConfiguration sniffer = null;
+
+    @JsonProperty
+    private Map<String, String> settings = Collections.emptyMap();
+
+    @JsonProperty
+    private Map<String, String> headers = Collections.emptyMap();
 
     public List<String> getServers() {
         return servers;
@@ -57,6 +63,18 @@ public class EsConfiguration {
             httpHosts.add(httpHost);
         });
         return httpHosts;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public List<BasicHeader> getHeadersAsHeaders() {
+        ArrayList<BasicHeader> basicHeaders = new ArrayList<>();
+        for (Map.Entry<String, String> entry: getHeaders().entrySet()) {
+            basicHeaders.add(new BasicHeader(entry.getKey(), entry.getValue()));
+        }
+        return basicHeaders;
     }
 
     public int getConnectTimeOut() {
@@ -75,8 +93,8 @@ public class EsConfiguration {
         return node;
     }
 
-    public CredentialConfiguration getCredential() {
-        return credential;
+    public BasicAuthenticationConfiguration getBasicAuthentication() {
+        return basicAuthentication;
     }
 
     public KeyStoreConfiguration getKeystore() {
@@ -85,5 +103,9 @@ public class EsConfiguration {
 
     public SnifferConfiguration getSniffer() {
         return sniffer;
+    }
+
+    public Map<String, String> getSettings() {
+        return settings;
     }
 }

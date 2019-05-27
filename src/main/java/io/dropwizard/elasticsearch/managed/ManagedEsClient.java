@@ -1,5 +1,6 @@
 package io.dropwizard.elasticsearch.managed;
 
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -18,7 +19,6 @@ import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.sniff.SniffOnFailureListener;
 import org.elasticsearch.client.sniff.Sniffer;
-import org.elasticsearch.client.sniff.SnifferBuilder;
 
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -42,11 +42,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ManagedEsClient implements Managed {
     private RestHighLevelClient client = null;
     private Sniffer sniffer = null;
-    public ManagedEsClient(final EsConfiguration config) {
+    public ManagedEsClient(final EsConfiguration config) throws Exception {
         checkNotNull(config, "EsConfiguration must not be null");
 
         RestClientBuilder restClientBuilder = RestClient.builder(config.getServersAsHttpHosts().toArray(new HttpHost[0]));
         setRequest(restClientBuilder, config);
+
+        if (!config.getHeadersAsHeaders().isEmpty()) {
+            restClientBuilder.setDefaultHeaders(config.getHeadersAsHeaders().toArray(new Header[0]));
+        }
 
         if (config.getNumberOfThreads()>0) {
             setThreads(restClientBuilder, config);
@@ -56,12 +60,12 @@ public class ManagedEsClient implements Managed {
             setNodeSelector(restClientBuilder, config);
         }
 
-        if (config.getCredential() != null) {
+        if (config.getBasicAuthentication() != null) {
             setCredential(restClientBuilder, config);
         }
 
         if (config.getKeystore()!= null) {
-            setCredential(restClientBuilder, config);
+            setKeyStore(restClientBuilder, config);
         }
 
         if (config.getSniffer()!=null) {
@@ -94,6 +98,16 @@ public class ManagedEsClient implements Managed {
      */
     public ManagedEsClient(RestHighLevelClient client) {
         this.client = checkNotNull(client, "Elasticsearch client must not be null");
+    }
+
+    /**
+     * Create a new managed Elasticsearch {@link Client} from the provided {@link Client}.
+     *
+     * @param client an initialized {@link Client} instance
+     */
+    public ManagedEsClient(RestHighLevelClient client, Sniffer sniffer) {
+        this.client = checkNotNull(client, "Elasticsearch client must not be null");
+        this.sniffer = checkNotNull(sniffer, "Sniffer must not be null");
     }
 
     /**
@@ -165,7 +179,7 @@ public class ManagedEsClient implements Managed {
         final CredentialsProvider credentialsProvider =
                 new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY,
-                new UsernamePasswordCredentials(config.getCredential().getUser(), config.getCredential().getPassword()));
+                new UsernamePasswordCredentials(config.getBasicAuthentication().getUser(), config.getBasicAuthentication().getPassword()));
         restClientBuilder
                 .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
                     @Override
@@ -225,16 +239,5 @@ public class ManagedEsClient implements Managed {
                 }
             }
         });
-    }
-
-    private Sniffer setSniffer(RestClient restClient, EsConfiguration config) {
-        SnifferBuilder snifferBuilder = Sniffer.builder(restClient)
-                .setSniffIntervalMillis(config.getSniffer().getSniffIntervalMillis());
-
-        if (config.getSniffer().getSniffOnFailure()) {
-            snifferBuilder.setSniffAfterFailureDelayMillis(config.getSniffer().getSniffAfterFailureDelayMillis())
-                    .build();
-        }
-        return sniffer;
     }
 }

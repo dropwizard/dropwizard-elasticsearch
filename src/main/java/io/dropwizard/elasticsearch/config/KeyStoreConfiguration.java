@@ -5,15 +5,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.validation.constraints.NotNull;
+
 public class KeyStoreConfiguration {
     @JsonProperty
     private String type = "jks";
 
     @JsonProperty
-    private String keyStorePath;
+    @NotNull
+    private String keyStorePath="";
 
     @JsonProperty
-    private String keyStorePass;
+    @NotNull
+    private String keyStorePass="";
 
     public String getType() {
         return type;
