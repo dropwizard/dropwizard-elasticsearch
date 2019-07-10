@@ -28,7 +28,7 @@ public class EsConfigurationTest {
     }
 
     @Test(expected = ConfigurationException.class)
-    public void eitherNodeClientOrServerListMustBeSet() throws IOException, ConfigurationException, URISyntaxException {
+    public void serverListMustBeSet() throws IOException, ConfigurationException, URISyntaxException {
         URL configFileUrl = this.getClass().getResource("/invalid.yml");
         File configFile = new File(configFileUrl.toURI());
         configFactory.build(configFile);

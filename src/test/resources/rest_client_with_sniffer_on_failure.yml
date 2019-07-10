@@ -1,0 +1,10 @@
+servers:
+  - http://127.0.0.1
+connectTimeOut: 5000
+socketTimeOut: 60000
+numberOfThreads: 1
+node: "node_one"
+sniffer:
+  sniffOnFailure: true
+  sniffIntervalMillis: 6000
+  sniffAfterFailureDelayMillis: 60000

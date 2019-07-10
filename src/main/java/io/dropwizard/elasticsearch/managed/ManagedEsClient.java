@@ -1,96 +1,113 @@
 package io.dropwizard.elasticsearch.managed;
 
-import com.google.common.io.Resources;
-import io.dropwizard.elasticsearch.config.EsConfiguration;
-import io.dropwizard.elasticsearch.util.TransportAddressHelper;
-import io.dropwizard.lifecycle.Managed;
+import org.apache.http.Header;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.apache.http.impl.nio.reactor.IOReactorConfig;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.node.Node;
+import org.elasticsearch.client.Node;
+import org.elasticsearch.client.NodeSelector;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.sniff.SniffOnFailureListener;
+import org.elasticsearch.client.sniff.Sniffer;
 
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.security.KeyStore;
+import java.util.Iterator;
+
+import javax.net.ssl.SSLContext;
+
+import io.dropwizard.elasticsearch.config.EsConfiguration;
+import io.dropwizard.lifecycle.Managed;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
+
 
 /**
- * A Dropwizard managed Elasticsearch {@link Client}. Depending on the {@link EsConfiguration} a Node Client or
- * a {@link TransportClient} a is being created and its lifecycle is managed by Dropwizard.
+ * A Dropwizard managed Elasticsearch {@link RestHighLevelClient}.
+ * Depending on the {@link EsConfiguration} a High Level Rest Client
+ * a {@link RestHighLevelClient} a is being created and its lifecycle is managed by Dropwizard.
  *
- * @see <a href="http://www.elasticsearch.org/guide/reference/java-api/client/#nodeclient">Node Client</a>
- * @see <a href="http://www.elasticsearch.org/guide/reference/java-api/client/#transportclient">Transport Client</a>
  */
 public class ManagedEsClient implements Managed {
-    private Node node = null;
-    private Client client = null;
-
-    /**
-     * Create a new managed Elasticsearch {@link Client}. If {@link EsConfiguration#nodeClient} is {@literal true}, a
-     * Node Client is being created, otherwise a {@link TransportClient} is being created with {@link EsConfiguration#servers}
-     * as transport addresses.
-     *
-     * @param config a valid {@link EsConfiguration} instance
-     */
-    public ManagedEsClient(final EsConfiguration config) {
+    private RestHighLevelClient client = null;
+    private Sniffer sniffer = null;
+    public ManagedEsClient(final EsConfiguration config) throws Exception {
         checkNotNull(config, "EsConfiguration must not be null");
 
-        final Settings.Builder settingsBuilder = Settings.builder();
-        if (!isNullOrEmpty(config.getSettingsFile())) {
-            Path path = Paths.get(config.getSettingsFile());
-            if (!path.toFile().exists()) {
-                try {
-                    final URL url = Resources.getResource(config.getSettingsFile());
-                    path = new File(url.toURI()).toPath();
-                } catch (URISyntaxException | NullPointerException e) {
-                    throw new IllegalArgumentException("settings file cannot be found", e);
-                }
+        RestClientBuilder restClientBuilder = RestClient.builder(config.getServersAsHttpHosts().toArray(new HttpHost[0]));
+        setRequest(restClientBuilder, config);
+
+        if (!config.getHeadersAsHeaders().isEmpty()) {
+            restClientBuilder.setDefaultHeaders(config.getHeadersAsHeaders().toArray(new Header[0]));
+        }
+
+        if (config.getNumberOfThreads()>0) {
+            setThreads(restClientBuilder, config);
+        }
+
+        if (config.getNode()!= null && !config.getNode().isEmpty()) {
+            setNodeSelector(restClientBuilder, config);
+        }
+
+        if (config.getBasicAuthentication() != null) {
+            setCredential(restClientBuilder, config);
+        }
+
+        if (config.getKeystore()!= null) {
+            setKeyStore(restClientBuilder, config);
+        }
+
+        if (config.getSniffer()!=null) {
+            if (config.getSniffer().getSniffOnFailure()) {
+                SniffOnFailureListener sniffOnFailureListener =
+                        new SniffOnFailureListener();
+                restClientBuilder.setFailureListener(sniffOnFailureListener);
+                this.client = new RestHighLevelClient(restClientBuilder);
+                this.sniffer = Sniffer.builder(this.client.getLowLevelClient())
+                        .setSniffAfterFailureDelayMillis(config.getSniffer().getSniffAfterFailureDelayMillis())
+                        .build();
+                sniffOnFailureListener.setSniffer(this.sniffer);
+
+            } else {
+                this.client = new RestHighLevelClient(restClientBuilder);
+                this.sniffer = Sniffer.builder(this.client.getLowLevelClient())
+                        .setSniffIntervalMillis(config.getSniffer().getSniffIntervalMillis())
+                        .build();
             }
-            settingsBuilder.loadFromPath(path);
-        }
 
-        final Settings settings = settingsBuilder
-                .put(config.getSettings())
-                .put("cluster.name", config.getClusterName())
-                .build();
-
-        if (config.isNodeClient()) {
-            this.node = nodeBuilder()
-                    .client(true)
-                    .data(false)
-                    .settings(settings)
-                    .build();
-            this.client = this.node.client();
         } else {
-            final TransportAddress[] addresses = TransportAddressHelper.fromHostAndPorts(config.getServers());
-            this.client = TransportClient.builder().settings(settings).build().addTransportAddresses(addresses);
+            this.client = new RestHighLevelClient(restClientBuilder);
         }
     }
-
-    /**
-     * Create a new managed Elasticsearch {@link Client} from the provided {@link Node}.
-     *
-     * @param node a valid {@link Node} instance
-     */
-    public ManagedEsClient(final Node node) {
-        this.node = checkNotNull(node, "Elasticsearch node must not be null");
-        this.client = node.client();
-    }
-
 
     /**
      * Create a new managed Elasticsearch {@link Client} from the provided {@link Client}.
      *
      * @param client an initialized {@link Client} instance
      */
-    public ManagedEsClient(Client client) {
+    public ManagedEsClient(RestHighLevelClient client) {
         this.client = checkNotNull(client, "Elasticsearch client must not be null");
+    }
+
+    /**
+     * Create a new managed Elasticsearch {@link Client} from the provided {@link Client}.
+     *
+     * @param client an initialized {@link Client} instance
+     */
+    public ManagedEsClient(RestHighLevelClient client, Sniffer sniffer) {
+        this.client = checkNotNull(client, "Elasticsearch client must not be null");
+        this.sniffer = checkNotNull(sniffer, "Sniffer must not be null");
     }
 
     /**
@@ -100,7 +117,6 @@ public class ManagedEsClient implements Managed {
      */
     @Override
     public void start() throws Exception {
-        startNode();
     }
 
     /**
@@ -112,7 +128,6 @@ public class ManagedEsClient implements Managed {
     @Override
     public void stop() throws Exception {
         closeClient();
-        closeNode();
     }
 
     /**
@@ -120,27 +135,109 @@ public class ManagedEsClient implements Managed {
      *
      * @return a valid Elasticsearch {@link Client} instance
      */
-    public Client getClient() {
+    public RestHighLevelClient getClient() {
         return client;
     }
 
-    private Node startNode() {
-        if (null != node) {
-            return node.start();
-        }
 
-        return null;
-    }
-
-    private void closeNode() {
-        if (null != node && !node.isClosed()) {
-            node.close();
-        }
-    }
-
-    private void closeClient() {
+    private void closeClient() throws Exception {
         if (null != client) {
             client.close();
         }
+        if (null != sniffer) {
+            sniffer.close();
+        }
+    }
+
+    private void setRequest(RestClientBuilder restClientBuilder, EsConfiguration config) {
+        restClientBuilder.setRequestConfigCallback(
+                new RestClientBuilder.RequestConfigCallback() {
+                    @Override
+                    public RequestConfig.Builder customizeRequestConfig(
+                            RequestConfig.Builder requestConfigBuilder) {
+                        return requestConfigBuilder
+                                .setConnectTimeout(config.getConnectTimeOut())
+                                .setSocketTimeout(config.getSocketTimeOut());
+                    }
+                });
+    }
+
+    private void setThreads(RestClientBuilder restClientBuilder, EsConfiguration config) {
+        restClientBuilder.setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
+            @Override
+            public HttpAsyncClientBuilder customizeHttpClient(
+                    HttpAsyncClientBuilder httpClientBuilder) {
+                return httpClientBuilder.setDefaultIOReactorConfig(
+                        IOReactorConfig.custom()
+                                .setIoThreadCount(config.getNumberOfThreads())
+                                .build());
+            }
+        });
+    }
+
+    private void setCredential(RestClientBuilder restClientBuilder, EsConfiguration config) {
+        final CredentialsProvider credentialsProvider =
+                new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY,
+                new UsernamePasswordCredentials(config.getBasicAuthentication().getUser(), config.getBasicAuthentication().getPassword()));
+        restClientBuilder
+                .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
+                    @Override
+                    public HttpAsyncClientBuilder customizeHttpClient(
+                            HttpAsyncClientBuilder httpClientBuilder) {
+                        httpClientBuilder.disableAuthCaching();
+                        return httpClientBuilder
+                                .setDefaultCredentialsProvider(credentialsProvider);
+                    }
+                });
+    }
+
+    private void setKeyStore(RestClientBuilder restClientBuilder, EsConfiguration config) throws Exception {
+        KeyStore truststore = KeyStore.getInstance(config.getKeystore().getType());
+        try (InputStream is = Files.newInputStream(config.getKeystore().getKeyStorePath())) {
+            truststore.load(is, config.getKeystore().getKeyStorePass().toCharArray());
+        }
+        SSLContextBuilder sslBuilder = SSLContexts.custom()
+                .loadTrustMaterial(truststore, null);
+        final SSLContext sslContext = sslBuilder.build();
+        restClientBuilder
+                .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
+                    @Override
+                    public HttpAsyncClientBuilder customizeHttpClient(
+                            HttpAsyncClientBuilder httpClientBuilder) {
+                        return httpClientBuilder.setSSLContext(sslContext);
+                    }
+                });
+    }
+
+    private void setNodeSelector(RestClientBuilder restClientBuilder, EsConfiguration config) {
+        restClientBuilder.setNodeSelector(new NodeSelector() {
+            @Override
+            public void select(Iterable<Node> nodes) {
+                /*
+                 * Prefer any node that belongs to rack_one. If none is around
+                 * we will go to another rack till it's time to try and revive
+                 * some of the nodes that belong to rack_one.
+                 */
+                boolean foundOne = false;
+                for (Node node : nodes) {
+                    String rackId = node.getAttributes().get("rack_id").get(0);
+                    if (config.getNode().equals(rackId)) {
+                        foundOne = true;
+                        break;
+                    }
+                }
+                if (foundOne) {
+                    Iterator<Node> nodesIt = nodes.iterator();
+                    while (nodesIt.hasNext()) {
+                        Node node = nodesIt.next();
+                        String rackId = node.getAttributes().get("rack_id").get(0);
+                        if (config.getNode().equals(rackId) == false) {
+                            nodesIt.remove();
+                        }
+                    }
+                }
+            }
+        });
     }
 }

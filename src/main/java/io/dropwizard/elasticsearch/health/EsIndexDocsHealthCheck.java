@@ -1,10 +1,16 @@
 package io.dropwizard.elasticsearch.health;
 
-import com.codahale.metrics.health.HealthCheck;
 import com.google.common.collect.ImmutableList;
-import org.elasticsearch.action.admin.indices.stats.IndexStats;
-import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
+
+import com.codahale.metrics.health.HealthCheck;
+
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +27,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class EsIndexDocsHealthCheck extends HealthCheck {
     private static final String HEALTH_CHECK_NAME = "elasticsearch-index-documents";
     private static final long DEFAULT_DOCUMENT_THRESHOLD = 1L;
-    private final Client client;
+    private final RestHighLevelClient client;
     private final String[] indices;
     private final long documentThreshold;
 
@@ -34,7 +40,7 @@ public class EsIndexDocsHealthCheck extends HealthCheck {
      * @throws IllegalArgumentException if {@code indices} was {@literal null} or empty,
      *                                  or {@code documentThreshold} was less than 1
      */
-    public EsIndexDocsHealthCheck(Client client, List<String> indices, long documentThreshold) {
+    public EsIndexDocsHealthCheck(RestHighLevelClient client, List<String> indices, long documentThreshold) {
         checkArgument(!indices.isEmpty(), "At least one index must be given");
         checkArgument(documentThreshold > 0L, "The document threshold must at least be 1");
 
@@ -50,7 +56,7 @@ public class EsIndexDocsHealthCheck extends HealthCheck {
      * @param client  an Elasticsearch {@link Client} instance connected to the cluster
      * @param indices a {@link List} of indices in Elasticsearch which should be checked
      */
-    public EsIndexDocsHealthCheck(Client client, List<String> indices) {
+    public EsIndexDocsHealthCheck(RestHighLevelClient client, List<String> indices) {
         this(client, indices, DEFAULT_DOCUMENT_THRESHOLD);
     }
 
@@ -61,7 +67,7 @@ public class EsIndexDocsHealthCheck extends HealthCheck {
      * @param indexName         the index in Elasticsearch which should be checked
      * @param documentThreshold the minimal number of documents in an index
      */
-    public EsIndexDocsHealthCheck(Client client, String indexName, long documentThreshold) {
+    public EsIndexDocsHealthCheck(RestHighLevelClient client, String indexName, long documentThreshold) {
         this(client, ImmutableList.of(indexName), documentThreshold);
     }
 
@@ -71,7 +77,7 @@ public class EsIndexDocsHealthCheck extends HealthCheck {
      * @param client    an Elasticsearch {@link Client} instance connected to the cluster
      * @param indexName the index in Elasticsearch which should be checked
      */
-    public EsIndexDocsHealthCheck(Client client, String indexName) {
+    public EsIndexDocsHealthCheck(RestHighLevelClient client, String indexName) {
         this(client, indexName, DEFAULT_DOCUMENT_THRESHOLD);
     }
 
@@ -86,28 +92,30 @@ public class EsIndexDocsHealthCheck extends HealthCheck {
      */
     @Override
     protected Result check() throws Exception {
-        final IndicesStatsResponse indicesStatsResponse = client.admin().indices().prepareStats(indices).get();
-
         final List<String> indexDetails = new ArrayList<String>(indices.length);
         boolean healthy = true;
 
-        for (IndexStats indexStats : indicesStatsResponse.getIndices().values()) {
-            long documentCount = indexStats.getPrimaries().getDocs().getCount();
-
+        for (String index: indices) {
+            long documentCount = count(index);
             if (documentCount < documentThreshold) {
                 healthy = false;
-                indexDetails.add(String.format("%s (%d)", indexStats.getIndex(), documentCount));
+                indexDetails.add(String.format("%s (%d)", index, documentCount));
             } else {
-                indexDetails.add(String.format("%s (%d!)", indexStats.getIndex(), documentCount));
+                indexDetails.add(String.format("%s (%d!)", index, documentCount));
             }
         }
-
         final String resultDetails = String.format("Last stats: %s", indexDetails);
-
         if (healthy) {
             return Result.healthy(resultDetails);
         } else {
             return Result.unhealthy(resultDetails);
         }
+    }
+
+    private long count(String index) throws Exception {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().query(QueryBuilders.matchAllQuery());
+        CountRequest countRequest = new CountRequest().source(searchSourceBuilder);
+        CountResponse countResponse = client.count(countRequest, RequestOptions.DEFAULT);
+        return countResponse.getCount();
     }
 }

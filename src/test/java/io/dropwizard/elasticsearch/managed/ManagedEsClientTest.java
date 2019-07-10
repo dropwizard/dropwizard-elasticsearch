@@ -1,37 +1,36 @@
 package io.dropwizard.elasticsearch.managed;
 
-import com.google.common.net.HostAndPort;
-import io.dropwizard.configuration.ConfigurationException;
-import io.dropwizard.configuration.ConfigurationFactory;
-import io.dropwizard.configuration.DefaultConfigurationFactoryFactory;
-import io.dropwizard.elasticsearch.config.EsConfiguration;
-import io.dropwizard.elasticsearch.util.TransportAddressHelper;
-import io.dropwizard.jackson.Jackson;
-import io.dropwizard.lifecycle.Managed;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.node.NodeClient;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.node.Node;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
+import org.elasticsearch.client.sniff.Sniffer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import javax.validation.Validation;
+import javax.validation.Validator;
+
+import io.dropwizard.configuration.ConfigurationException;
+import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.configuration.DefaultConfigurationFactoryFactory;
+import io.dropwizard.elasticsearch.config.EsConfiguration;
+import io.dropwizard.jackson.Jackson;
+import io.dropwizard.lifecycle.Managed;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ManagedEsClient}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ManagedEsClientTest {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     private final ConfigurationFactory<EsConfiguration> configFactory =
@@ -39,130 +38,115 @@ public class ManagedEsClientTest {
                     .create(EsConfiguration.class, validator, Jackson.newObjectMapper(), "dw");
 
     @Test(expected = NullPointerException.class)
-    public void ensureEsConfigurationIsNotNull() {
+    public void ensureEsConfigurationIsNotNull() throws Exception {
         new ManagedEsClient((EsConfiguration) null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void ensureNodeIsNotNull() {
-        new ManagedEsClient((Node) null);
-    }
-
-    @Test(expected = NullPointerException.class)
     public void ensureClientIsNotNull() {
-        new ManagedEsClient((Client) null);
+        new ManagedEsClient((RestHighLevelClient) null);
     }
 
     @Test
     public void stopShouldCloseTheClient() throws Exception {
-        Client client = mock(Client.class);
+        RestHighLevelClient client =
+                mock(RestHighLevelClient.class);
         Managed managed = new ManagedEsClient(client);
-
+        // to stub a final method it is necessary to have the
+        //  /src/test/resources/mockito-extensions/org.mockiot.plugins.MockMaker     file
+        // with `mock-maker-inline` as context
+        doNothing().when(client).close();
+        assertNotNull(client);
         managed.start();
         managed.stop();
-
         verify(client).close();
+        assertNotNull(client);
     }
 
     @Test
-    public void lifecycleMethodsShouldStartAndCloseTheNode() throws Exception {
-        Node node = mock(Node.class);
-        when(node.isClosed()).thenReturn(false);
-        Managed managed = new ManagedEsClient(node);
-
+    public void stopShouldCloseTheClientWithSniffer() throws Exception {
+        RestHighLevelClient client =
+                mock(RestHighLevelClient.class);
+        Sniffer sniffer = mock(Sniffer.class);
+        Managed managed = new ManagedEsClient(client, sniffer);
+        // to stub a final method it is necessary to have the
+        //  /src/test/resources/mockito-extensions/org.mockiot.plugins.MockMaker     file
+        // with `mock-maker-inline` as context
+        doNothing().when(client).close();
+        doNothing().when(sniffer).close();
+        assertNotNull(client);
         managed.start();
-        verify(node).start();
-
         managed.stop();
-        verify(node).close();
+        verify(client).close();
+        verify(sniffer).close();
     }
 
     @Test
-    public void managedEsClientWithNodeShouldReturnClient() throws Exception {
-        Client client = mock(Client.class);
-        Node node = mock(Node.class);
-        when(node.client()).thenReturn(client);
-
-        ManagedEsClient managed = new ManagedEsClient(node);
-
-        assertSame(client, managed.getClient());
-    }
-
-    @Test
-    public void nodeClientShouldBeCreatedFromConfig() throws URISyntaxException, IOException, ConfigurationException {
-        URL configFileUrl = this.getClass().getResource("/node_client.yml");
+    public void highLevelRestClientShouldBeCreatedFromConfig() throws Exception {
+        URL configFileUrl = this.getClass().getResource("/rest_client.yml");
         File configFile = new File(configFileUrl.toURI());
         EsConfiguration config = configFactory.build(configFile);
 
         ManagedEsClient managedEsClient = new ManagedEsClient(config);
-        Client client = managedEsClient.getClient();
+        RestHighLevelClient restHighLevelClient = managedEsClient.getClient();
 
-        assertNotNull(client);
-        assertTrue(client instanceof NodeClient);
+        assertNotNull(restHighLevelClient);
 
-        NodeClient nodeClient = (NodeClient) client;
-        assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
-        assertEquals("true", nodeClient.settings().get("node.client"));
-        assertEquals("false", nodeClient.settings().get("node.data"));
-    }
-
-    @Test
-    public void transportClientShouldBeCreatedFromConfig() throws URISyntaxException, IOException, ConfigurationException {
-        URL configFileUrl = this.getClass().getResource("/transport_client.yml");
-        File configFile = new File(configFileUrl.toURI());
-        EsConfiguration config = configFactory.build(configFile);
-
-        ManagedEsClient managedEsClient = new ManagedEsClient(config);
-        Client client = managedEsClient.getClient();
-
-        assertNotNull(client);
-        assertTrue(client instanceof TransportClient);
-
-        final TransportClient transportClient = (TransportClient) client;
-        assertEquals(3, transportClient.transportAddresses().size());
+        assertEquals(3, restHighLevelClient.getLowLevelClient().getNodes().size());
         assertEquals(
-                TransportAddressHelper.fromHostAndPort(HostAndPort.fromParts("127.0.0.1", 9300)),
-                transportClient.transportAddresses().get(0));
+                "127.0.0.1",
+                restHighLevelClient.getLowLevelClient().getNodes().get(0).getHost().getHostName());
+
         assertEquals(
-                TransportAddressHelper.fromHostAndPort(HostAndPort.fromParts("127.0.0.1", 9301)),
-                transportClient.transportAddresses().get(1));
+                9200,
+                restHighLevelClient.getLowLevelClient().getNodes().get(0).getHost().getPort());
         assertEquals(
-                TransportAddressHelper.fromHostAndPort(HostAndPort.fromParts("127.0.0.1", 9302)),
-                transportClient.transportAddresses().get(2));
+                "127.0.0.1",
+                restHighLevelClient.getLowLevelClient().getNodes().get(1).getHost().getHostName());
+
+        assertEquals(
+                9201,
+                restHighLevelClient.getLowLevelClient().getNodes().get(1).getHost().getPort());
+        assertEquals(
+                "127.0.0.1",
+                restHighLevelClient.getLowLevelClient().getNodes().get(2).getHost().getHostName());
+
+        assertEquals(
+                9202,
+                restHighLevelClient.getLowLevelClient().getNodes().get(2).getHost().getPort());
     }
 
     @Test
-    public void managedClientShouldUseCustomElasticsearchConfig() throws URISyntaxException, IOException, ConfigurationException {
-        URL configFileUrl = this.getClass().getResource("/custom_settings_file.yml");
+    public void highLevelRestClientShouldBeCreatedFromConfigWithExtendedFields() throws Exception {
+        URL configFileUrl = this.getClass().getResource("/rest_client_with_sniffer_on_failure.yml");
         File configFile = new File(configFileUrl.toURI());
         EsConfiguration config = configFactory.build(configFile);
 
         ManagedEsClient managedEsClient = new ManagedEsClient(config);
-        Client client = managedEsClient.getClient();
+        RestHighLevelClient restHighLevelClient = managedEsClient.getClient();
 
-        assertNotNull(client);
-        assertTrue(client instanceof NodeClient);
+        assertNotNull(restHighLevelClient);
 
-        NodeClient nodeClient = (NodeClient) client;
-        assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
-        assertEquals("19300-19400", nodeClient.settings().get("transport.tcp.port"));
+        assertEquals(1, restHighLevelClient.getLowLevelClient().getNodes().size());
+        assertEquals(
+                "127.0.0.1",
+                restHighLevelClient.getLowLevelClient().getNodes().get(0).getHost().getHostName());
     }
 
     @Test
-    public void managedClientObeysPrecedenceOfSettings() throws URISyntaxException, IOException, ConfigurationException {
-        URL configFileUrl = this.getClass().getResource("/custom_settings_precedence.yml");
+    public void highLevelRestClientShouldBeCreatedWithSniffer() throws Exception {
+        URL configFileUrl = this.getClass().getResource("/rest_client_sniffer.yml");
         File configFile = new File(configFileUrl.toURI());
         EsConfiguration config = configFactory.build(configFile);
 
         ManagedEsClient managedEsClient = new ManagedEsClient(config);
-        Client client = managedEsClient.getClient();
+        RestHighLevelClient restHighLevelClient = managedEsClient.getClient();
 
-        assertNotNull(client);
-        assertTrue(client instanceof NodeClient);
+        assertNotNull(restHighLevelClient);
 
-        NodeClient nodeClient = (NodeClient) client;
-        assertEquals(config.getClusterName(), nodeClient.settings().get("cluster.name"));
-        assertEquals("29300-29400", nodeClient.settings().get("transport.tcp.port"));
-        assertEquals("target/data/yaml", nodeClient.settings().get("path.home"));
+        assertEquals(1, restHighLevelClient.getLowLevelClient().getNodes().size());
+        assertEquals(
+                "127.0.0.1",
+                restHighLevelClient.getLowLevelClient().getNodes().get(0).getHost().getHostName());
     }
 }

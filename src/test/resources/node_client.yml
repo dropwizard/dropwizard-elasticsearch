@@ -1,3 +1,0 @@
-clusterName: dropwizard_elasticsearch_test
-settings:
-  path.home: "target/data"

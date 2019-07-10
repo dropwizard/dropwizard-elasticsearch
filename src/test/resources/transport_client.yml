@@ -1,6 +1,0 @@
-nodeClient: false
-clusterName: dropwizard_elasticsearch_test
-servers:
-  - 127.0.0.1
-  - 127.0.0.1:9301
-  - 127.0.0.1:9302

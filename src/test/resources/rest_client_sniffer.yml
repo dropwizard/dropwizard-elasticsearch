@@ -1,0 +1,15 @@
+servers:
+  - http://127.0.0.1
+connectTimeOut: 5000
+socketTimeOut: 60000
+numberOfThreads: 1
+node: "node_one"
+headers:
+  header_one: value
+basicAuthentication:
+  user: one_user
+  password: mYsEcReT
+sniffer:
+  sniffOnFailure: false
+  sniffIntervalMillis: 6000
+  sniffAfterFailureDelayMillis: 60000
