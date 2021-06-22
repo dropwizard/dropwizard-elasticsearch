@@ -71,7 +71,7 @@
         <sonar.projectKey>dropwizard_dropwizard-elasticsearch</sonar.projectKey>
         <sonar.organization>dropwizard</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <dropwizard.version>1.3.16</dropwizard.version>
+        <dropwizard.version>2.0.23</dropwizard.version>
         <elasticsearch.version>2.4.6</elasticsearch.version>
     </properties>
 
