@@ -25,7 +25,7 @@ create an `ManagedEsClient` instance in the run method of your service.
 You can also add one of the existing health checks to your [Environment](http://dropwizard.io/1.2.0/docs/manual/core.html#environments)
 in the same method. At least the usage of `EsClusterHealthCheck` is strongly advised.
 
-
+```java
     public class DemoApplication extends Application<DemoConfiguration> {
         // [...]
         @Override
@@ -36,7 +36,7 @@ in the same method. At least the usage of `EsClusterHealthCheck` is strongly adv
             // [...]
         }
     }
-
+```
 
 Configuration
 -------------
@@ -51,9 +51,11 @@ The following configuration settings are supported by `EsConfiguration`:
 
 An example configuration file for creating a Node Client could like this:
 
+```yaml
     clusterName: MyClusterName
     settings:
       node.name: MyCustomNodeName
+```
 
 The order of precedence is: `nodeClient`/`servers`/`clusterName` > `settings` > `settingsFile`, meaning that
 any setting in `settingsFile` can be overwritten with `settings` which in turn get overwritten by the specific settings
@@ -64,13 +66,13 @@ Maven Artifacts
 
 This project is available on Maven Central. To add it to your project simply add the following dependencies to your
 `pom.xml`:
-
+```xml
     <dependency>
       <groupId>io.dropwizard.modules</groupId>
       <artifactId>dropwizard-elasticsearch</artifactId>
       <version>1.2.0-1</version>
     </dependency>
-
+```
 
 Support
 -------
